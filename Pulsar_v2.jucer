@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="ol9ox3" name="Pulsar" projectType="audioplug" useAppConfig="0"
+              displaySplashScreen="1" jucerFormatVersion="1" version="1.1.2"
+              companyName="recluse-audio" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
+  <MAINGROUP id="Nhp3p7" name="Pulsar">
+    <GROUP id="{BDB895A9-BC5A-2BC3-4E3E-58D908A5FF2B}" name="Source">
+      <GROUP id="{6D25C5FD-8225-4754-111B-31E9B281B2BD}" name="Components">
+        <GROUP id="{C72D76EF-4FC9-CA3B-A66B-866D157514A1}" name="GUI">
+          <FILE id="IXAdOs" name="PulsarSlider.cpp" compile="1" resource="0"
+                file="Source/Components/PulsarSlider.cpp"/>
+          <FILE id="hC6W1H" name="PulsarSlider.h" compile="0" resource="0" file="Source/Components/PulsarSlider.h"/>
+          <FILE id="jSA28L" name="PulsarControlsComponent.cpp" compile="1" resource="0"
+                file="Source/Components/PulsarControlsComponent.cpp"/>
+          <FILE id="juTlLS" name="PulsarControlsComponent.h" compile="0" resource="0"
+                file="Source/Components/PulsarControlsComponent.h"/>
+        </GROUP>
+        <GROUP id="{0CEF6708-8F1B-ABFD-43B9-7C54FA9EEBA9}" name="Envelope">
+          <FILE id="O27JsI" name="EnvelopeControlPoint.h" compile="0" resource="0"
+                file="Source/Components/EnvelopeControlPoint.h"/>
+          <FILE id="qoOOgW" name="EnvelopeVisualizer.cpp" compile="1" resource="0"
+                file="Source/Components/EnvelopeVisualizer.cpp"/>
+          <FILE id="VQeJ7T" name="EnvelopeVisualizer.h" compile="0" resource="0"
+                file="Source/Components/EnvelopeVisualizer.h"/>
+        </GROUP>
+        <GROUP id="{812499BD-65A3-F176-B08E-5FA0DDB2AB9A}" name="Menu">
+          <FILE id="MPwvHb" name="BurgerMenuHeader.h" compile="0" resource="0"
+                file="Source/Components/BurgerMenuHeader.h"/>
+        </GROUP>
+        <GROUP id="{39C1B72F-8883-6BCB-58BA-52CA5624F53D}" name="Command Runner">
+          <FILE id="kxTowB" name="ParameterDictionary.h" compile="0" resource="0"
+                file="Source/Components/ParameterDictionary.h"/>
+          <FILE id="TAEonb" name="AboutComponent.h" compile="0" resource="0"
+                file="Source/Components/AboutComponent.h"/>
+          <FILE id="CmE71z" name="ThanksComponent.h" compile="0" resource="0"
+                file="Source/Components/ThanksComponent.h"/>
+          <FILE id="Jpbvp8" name="DemoComponent.h" compile="0" resource="0" file="Source/Components/DemoComponent.h"/>
+          <FILE id="v9a4he" name="CommandRunnerComponent.h" compile="0" resource="0"
+                file="Source/Components/CommandRunnerComponent.h"/>
+          <FILE id="V2ouee" name="TutorialImageComponent.h" compile="0" resource="0"
+                file="Source/Components/TutorialImageComponent.h"/>
+          <FILE id="VxZ14h" name="UserPresetMenu.h" compile="0" resource="0"
+                file="Source/Components/UserPresetMenu.h"/>
+          <FILE id="iiBOZD" name="PresetMenu.h" compile="0" resource="0" file="Source/Components/PresetMenu.h"/>
+        </GROUP>
+        <FILE id="W02tlO" name="PluginEditor.cpp" compile="1" resource="0"
+              file="Source/Components/PluginEditor.cpp"/>
+        <FILE id="y95KKt" name="PluginEditor.h" compile="0" resource="0" file="Source/Components/PluginEditor.h"/>
+        <FILE id="xJoQRC" name="PulsaretVisualizer.cpp" compile="1" resource="0"
+              file="Source/Components/PulsaretVisualizer.cpp"/>
+        <FILE id="Zw1a5Y" name="PulsaretVisualizer.h" compile="0" resource="0"
+              file="Source/Components/PulsaretVisualizer.h"/>
+      </GROUP>
+      <GROUP id="{0E8D23FF-ABB2-D69D-BCCE-778F3FBFB373}" name="Envelope">
+        <FILE id="PBFKFl" name="Envelope.cpp" compile="1" resource="0" file="Source/Envelope/Envelope.cpp"/>
+        <FILE id="TjvIFZ" name="Envelope.h" compile="0" resource="0" file="Source/Envelope/Envelope.h"/>
+      </GROUP>
+      <GROUP id="{6407F8DE-F2EB-CD57-7E7D-A3A1A686BF63}" name="LookNFeel">
+        <FILE id="XjqV4D" name="MixFeel.cpp" compile="1" resource="0" file="Source/LookNFeel/MixFeel.cpp"/>
+        <FILE id="RzzlWg" name="MixFeel.h" compile="0" resource="0" file="Source/LookNFeel/MixFeel.h"/>
+        <FILE id="RQuXEO" name="NameFeel.cpp" compile="1" resource="0" file="Source/LookNFeel/NameFeel.cpp"/>
+        <FILE id="wsIJmq" name="NameFeel.h" compile="0" resource="0" file="Source/LookNFeel/NameFeel.h"/>
+        <FILE id="E2q76E" name="PulsarUIFeel.cpp" compile="1" resource="0"
+              file="Source/LookNFeel/PulsarUIFeel.cpp"/>
+        <FILE id="GPy9XK" name="PulsarUIFeel.h" compile="0" resource="0" file="Source/LookNFeel/PulsarUIFeel.h"/>
+      </GROUP>
+      <GROUP id="{FFB0AF70-4C80-C7F9-DF6F-E65103C3BA2F}" name="Processor">
+        <FILE id="BuROxw" name="TempoSync.cpp" compile="1" resource="0" file="Source/Processor/TempoSync.cpp"/>
+        <FILE id="STMz7G" name="TempoSync.h" compile="0" resource="0" file="Source/Processor/TempoSync.h"/>
+        <FILE id="RPkxB0" name="PluginProcessor.cpp" compile="1" resource="0"
+              file="Source/Processor/PluginProcessor.cpp"/>
+        <FILE id="p9R3v8" name="PluginProcessor.h" compile="0" resource="0"
+              file="Source/Processor/PluginProcessor.h"/>
+      </GROUP>
+      <GROUP id="{E2932935-AF39-F3F8-9CE7-B254A30B3406}" name="Pulsar Train">
+        <FILE id="YaTBjQ" name="PulsarTrain.cpp" compile="1" resource="0" file="Source/Pulsar Train/PulsarTrain.cpp"/>
+        <FILE id="JWQnBW" name="PulsarTrain.h" compile="0" resource="0" file="Source/Pulsar Train/PulsarTrain.h"/>
+      </GROUP>
+      <GROUP id="{97DCBDE7-39BC-C691-062D-D5C651484E1A}" name="Pulsaret">
+        <FILE id="wBQNnG" name="Table.cpp" compile="1" resource="0" file="Source/Pulsaret/Table.cpp"/>
+        <FILE id="IP3EzU" name="Table.h" compile="0" resource="0" file="Source/Pulsaret/Table.h"/>
+        <GROUP id="{2522AF33-E4D4-2662-003C-DA0E6C32DB07}" name="Owned Pulsaret">
+          <FILE id="dXphEZ" name="OwnedPulsaret.cpp" compile="1" resource="0"
+                file="Source/Pulsaret/OwnedPulsaret.cpp"/>
+          <FILE id="GSgyYU" name="OwnedPulsaret.h" compile="0" resource="0" file="Source/Pulsaret/OwnedPulsaret.h"/>
+        </GROUP>
+        <GROUP id="{E06417EA-9A10-267F-D487-A41D6C81C3A5}" name="Base">
+          <FILE id="hMVhRj" name="PulsaretTable.cpp" compile="1" resource="0"
+                file="Source/Pulsaret/PulsaretTable.cpp"/>
+          <FILE id="oUAUiT" name="PulsaretTable.h" compile="0" resource="0" file="Source/Pulsaret/PulsaretTable.h"/>
+          <FILE id="YffI7k" name="Pulsaret.cpp" compile="1" resource="0" file="Source/Pulsaret/Pulsaret.cpp"/>
+          <FILE id="XjLGwk" name="Pulsaret.h" compile="0" resource="0" file="Source/Pulsaret/Pulsaret.h"/>
+        </GROUP>
+        <FILE id="HZ3Ark" name="MidiTransformer.cpp" compile="1" resource="0"
+              file="Source/Pulsaret/MidiTransformer.cpp"/>
+        <FILE id="IgOAbz" name="MidiTransformer.h" compile="0" resource="0"
+              file="Source/Pulsaret/MidiTransformer.h"/>
+        <FILE id="AEmVx9" name="PulsaretFactory.cpp" compile="1" resource="0"
+              file="Source/Pulsaret/PulsaretFactory.cpp"/>
+        <FILE id="dgOYgB" name="PulsaretFactory.h" compile="0" resource="0"
+              file="Source/Pulsaret/PulsaretFactory.h"/>
+      </GROUP>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <VS2019 targetFolder="Builds/VisualStudio2019">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Pulsar"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Pulsar"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../JUCE_Home/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../JUCE_Home/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2019>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <WINDOWS/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>
