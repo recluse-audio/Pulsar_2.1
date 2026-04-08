@@ -9,7 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../Pulsar Train/PulsarTrain.h"
+#include "../PULSAR_TRAIN/PulsarTrain.h"
 #include "../Pulsaret/PulsaretTable.h"
 #include "../Pulsaret/Table.h"
 

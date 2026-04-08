@@ -1,21 +1,21 @@
 set(SOURCES
+    SOURCE/Components/AboutComponent.h
+    SOURCE/Components/BurgerMenuHeader.h
+    SOURCE/Components/CommandRunnerComponent.h
+    SOURCE/Components/DemoComponent.h
+    SOURCE/Components/EnvelopeControlPoint.h
     SOURCE/Components/EnvelopeVisualizer.cpp
     SOURCE/Components/EnvelopeVisualizer.h
-    SOURCE/Components/EnvelopeControlPoint.h
+    SOURCE/Components/ParameterDictionary.h
     SOURCE/Components/PluginEditor.cpp
     SOURCE/Components/PluginEditor.h
+    SOURCE/Components/PresetMenu.h
     SOURCE/Components/PulsarControlsComponent.cpp
     SOURCE/Components/PulsarControlsComponent.h
     SOURCE/Components/PulsarSlider.cpp
     SOURCE/Components/PulsarSlider.h
     SOURCE/Components/PulsaretVisualizer.cpp
     SOURCE/Components/PulsaretVisualizer.h
-    SOURCE/Components/AboutComponent.h
-    SOURCE/Components/BurgerMenuHeader.h
-    SOURCE/Components/CommandRunnerComponent.h
-    SOURCE/Components/DemoComponent.h
-    SOURCE/Components/ParameterDictionary.h
-    SOURCE/Components/PresetMenu.h
     SOURCE/Components/ThanksComponent.h
     SOURCE/Components/TutorialImageComponent.h
     SOURCE/Components/UserPresetMenu.h
@@ -32,8 +32,8 @@ set(SOURCES
     SOURCE/Processor/PluginProcessor.h
     SOURCE/Processor/TempoSync.cpp
     SOURCE/Processor/TempoSync.h
-    SOURCE/Pulsar Train/PulsarTrain.cpp
-    SOURCE/Pulsar Train/PulsarTrain.h
+    SOURCE/PULSAR_TRAIN/PulsarTrain.cpp
+    SOURCE/PULSAR_TRAIN/PulsarTrain.h
     SOURCE/PulsarSynthesiser.cpp
     SOURCE/PulsarSynthesiser.h
     SOURCE/Pulsaret/MidiTransformer.cpp

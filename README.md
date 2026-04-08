@@ -59,7 +59,7 @@ Pulsar_2.1/
 │   ├── Components/      # PluginEditor, UI components
 │   ├── Envelope/        # Envelope DSP
 │   ├── LookNFeel/       # Custom JUCE LookAndFeel
-│   ├── Pulsar Train/    # Pulsar train generation
+│   ├── PULSAR_TRAIN/    # Pulsar train generation
 │   ├── Pulsaret/        # Pulsaret core, tables, MIDI, factory
 │   └── Util/            # Version header
 ├── CMAKE/               # CMake configuration files
