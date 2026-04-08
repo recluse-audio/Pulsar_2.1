@@ -124,6 +124,7 @@ if(BUILD_TESTS OR TARGET Tests)
     target_include_directories(Tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/SOURCE
+        ${CMAKE_BINARY_DIR}/Pulsar_artefacts/JuceLibraryCode
     )
 
     target_link_libraries(Tests PRIVATE
@@ -141,12 +142,20 @@ if(BUILD_TESTS OR TARGET Tests)
 
     # Define JUCE plugin macros for Tests target
     target_compile_definitions(Tests PRIVATE
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_MODAL_LOOPS_PERMITTED=1
+        JUCE_REPORT_APP_USAGE=0
         JucePlugin_Name="Pulsar"
         JucePlugin_WantsMidiInput=1
         JucePlugin_ProducesMidiOutput=0
         JucePlugin_IsMidiEffect=0
         JucePlugin_IsSynth=1
     )
+
+    # Ensure JuceHeader.h is generated before building Tests
+    add_dependencies(Tests Pulsar)
 
     # Enable CTest
     include(CTest)

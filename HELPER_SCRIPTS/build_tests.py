@@ -25,9 +25,16 @@ def main():
     # Regenerate CMake file lists before building
     regenerate_cmake_lists()
 
+    build_dir = Path("BUILD")
+    build_dir.mkdir(exist_ok=True)
+
     try:
-        run(["cmake", "-DCMAKE_BUILD_TYPE=Debug", "-DBUILD_TESTS=ON", ".."], Path("BUILD"))
-        run(["cmake", "--build", ".", "--target", "Tests"], Path("BUILD"))
+        run(["cmake", "-DCMAKE_BUILD_TYPE=Debug", "-DBUILD_TESTS=ON", ".."], build_dir)
+
+        build_cmd = ["cmake", "--build", ".", "--target", "Tests"]
+        if sys.platform.startswith("win"):
+            build_cmd += ["--config", "Debug"]
+        run(build_cmd, build_dir)
     except Exception:
         beep(success=False)
         raise
