@@ -22,10 +22,6 @@ PulsarAudioProcessor::PulsarAudioProcessor()
                        ), apvts(*this, nullptr, "Params", createParams())
 #endif
 {
-    //
-    apvts.state.addListener(this);
-    
-
 }
 
 PulsarAudioProcessor::~PulsarAudioProcessor()
@@ -144,15 +140,23 @@ void PulsarAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 
     if (pulsarTrain.isSynchronized())
     {
-        playHead = this->getPlayHead();
-        playHead->getCurrentPosition(currentPos);
-        pulsarTrain.setTempo(currentPos.bpm, currentPos.timeSigNumerator, currentPos.timeSigDenominator);
+        if (auto* ph = getPlayHead())
+        {
+            if (auto pos = ph->getPosition())
+            {
+                auto bpm = pos->getBpm().orFallback(120.0);
+                int num = 4, denom = 4;
+                if (auto sig = pos->getTimeSignature())
+                {
+                    num = sig->numerator;
+                    denom = sig->denominator;
+                }
+                pulsarTrain.setTempo(bpm, num, denom);
+            }
+        }
     }
 
-    if (mustUpdateProcessing)
-    {
-        update();
-    }
+    update();
 
     for (auto it = midiMessages.findNextSamplePosition (0); it != midiMessages.cend(); ++it)
     {
@@ -222,7 +226,6 @@ void PulsarAudioProcessor::loadPreset(const juce::String& presetPathName)
     auto file = juce::File(presetPathName);
     file.loadFileAsData(block); // fills block with files data.  See setStateInformation() in Audio Processor Base class
     setStateInformation(block.getData(), (int)block.getSize());
-    mustUpdateProcessing = true;
 }
 
 void PulsarAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -247,21 +250,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 
 void PulsarAudioProcessor::update()
 {
-    mustUpdateProcessing = false;
-    
     pulsarTrain.update(apvts);
-    
-
-    auto rhythmic = apvts.getRawParameterValue("Rhythmic Grid Mode");
-}
-
-
-
-/*=============================================================================================*/
-/*=============================================================================================*/
-void PulsarAudioProcessor::valueTreePropertyChanged(ValueTree& tree, const Identifier& property)
-{
-    mustUpdateProcessing = true;
 }
 
 

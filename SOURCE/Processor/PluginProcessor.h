@@ -19,7 +19,7 @@
 //==============================================================================
 /**
 */
-class PulsarAudioProcessor  : public juce::AudioProcessor, public ValueTree::Listener
+class PulsarAudioProcessor  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
@@ -70,7 +70,6 @@ public:
     
     AudioProcessorValueTreeState apvts;
     AudioProcessorValueTreeState::ParameterLayout createParams();
-    void valueTreePropertyChanged(ValueTree& tree, const Identifier& property) override;
     
     void triggerPulsarTrain();
     void releasePulsarTrain();
@@ -88,12 +87,8 @@ public:
     void loadDefaultParameters();
 
 private:
-    AudioPlayHead* playHead;
-    AudioPlayHead::CurrentPositionInfo currentPos;
-
     PulsarTrain pulsarTrain;
     bool trainRunning = false;
-    bool mustUpdateProcessing { false };
     bool inSyncMode{ false };
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PulsarAudioProcessor)
