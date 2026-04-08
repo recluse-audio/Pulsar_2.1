@@ -57,10 +57,10 @@ public:
     void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
-    void savePreset(juce::String& presetPath); // name will be set and held in the menu component
+    void savePreset(const juce::String& presetPath); // name will be set and held in the menu component
     void getStateInformation (juce::MemoryBlock& destData) override;
 
-    void loadPreset(juce::String& presetPath); // calls set
+    void loadPreset(const juce::String& presetPath); // calls set
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     

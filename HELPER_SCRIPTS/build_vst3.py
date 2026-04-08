@@ -15,8 +15,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Get plugin name from current working directory
-PLUGIN_NAME = Path.cwd().name
+# Plugin name must match the CMake target defined in CMakeLists.txt
+PLUGIN_NAME = "Pulsar"
 
 
 def run(cmd: list[str], cwd: Path) -> None:

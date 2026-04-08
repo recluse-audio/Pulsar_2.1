@@ -53,6 +53,9 @@ juce_add_plugin(Pulsar
     VST3_CATEGORIES Instrument Synth
 )
 
+# Generate JuceHeader.h for legacy #include <JuceHeader.h> compatibility
+juce_generate_juce_header(Pulsar)
+
 # Source files
 include(CMAKE/SOURCES.cmake)
 target_sources(Pulsar PRIVATE ${SOURCES})
@@ -85,7 +88,7 @@ target_compile_definitions(Pulsar
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
-        JUCE_DISPLAY_SPLASH_SCREEN=1
+        JUCE_MODAL_LOOPS_PERMITTED=1
         JUCE_REPORT_APP_USAGE=0
 )
 

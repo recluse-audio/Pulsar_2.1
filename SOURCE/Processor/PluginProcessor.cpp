@@ -195,7 +195,7 @@ juce::AudioProcessorEditor* PulsarAudioProcessor::createEditor()
 }
 
 
-void PulsarAudioProcessor::savePreset(juce::String& presetPath)
+void PulsarAudioProcessor::savePreset(const juce::String& presetPath)
 {
     MemoryBlock block;
     auto file = juce::File(presetPath);
@@ -214,7 +214,7 @@ void PulsarAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 }
 /*--------------------------------------------------------------------*/
 
-void PulsarAudioProcessor::loadPreset(juce::String& presetPathName)
+void PulsarAudioProcessor::loadPreset(const juce::String& presetPathName)
 {
     // want to call setStateInformation(const void* data, int sizeInBytes)
     // file to memory block?

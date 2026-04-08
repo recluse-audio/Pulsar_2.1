@@ -133,7 +133,7 @@ public:
         return filePaths.getReference(index); 
     }
 
-    void createNewPreset(juce::String& presetName)
+    void createNewPreset(const juce::String& presetName)
     {
         juce::String filePath = "C:/ProgramData/Recluse-Audio/Pulsar/User Presets/";
         filePath.append(presetName, 64);
