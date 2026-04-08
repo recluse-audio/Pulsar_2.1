@@ -1,0 +1,67 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(Windows) Debug Standalone App",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/BUILD/Pulsar_artefacts/Debug/Standalone/Pulsar.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "(macOS) Debug Standalone App",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/BUILD/Pulsar_artefacts/Debug/Standalone/Pulsar.app/Contents/MacOS/Pulsar",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "(Windows) Debug Catch2 Tests",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/BUILD/Debug/Tests.exe",
+            "args": ["--break"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "(macOS) Debug Catch2 Tests",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/BUILD/Debug/Tests",
+            "args": ["--break"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "(Windows) Debug [PluginName] Tests",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/BUILD/Debug/Tests.exe",
+            "args": ["[PluginName]", "--break"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "(Windows) Attach to Process",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        },
+        {
+            "name": "(macOS) Attach to Process",
+            "type": "lldb",
+            "request": "attach",
+            "pid": "${command:pickProcess}",
+            "stopOnEntry": true
+        }
+    ]
+}

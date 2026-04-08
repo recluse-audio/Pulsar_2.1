@@ -1,2 +1,49 @@
+# CMake artifacts
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Build directory
+BUILD/*
+!BUILD/.gitkeep
+
+# Installation artifacts
+Install/*
+
+# IDE configurations
+.idea/
+.vscode/
+cmake-build-*/
+
+# VS Code workspace
+*.code-workspace
+
+# Visual Studio
+.vs/
+out/
+*.user
+*.suo
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Test output
+TESTS/OUTPUT/*
+
+# Legacy JUCE / Projucer build artifacts
 **/Builds
 **/JuceLibraryCode
