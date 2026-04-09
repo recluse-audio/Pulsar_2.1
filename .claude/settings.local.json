@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(python HELPER_SCRIPTS/rebuild_all.py --clean)",
+      "Bash(python HELPER_SCRIPTS/rebuild_all.py)",
+      "Bash(python HELPER_SCRIPTS/build_tests.py)",
+      "Bash(python HELPER_SCRIPTS/build_vst3.py)",
+      "Bash(./BUILD/Debug/Tests.exe \"[Parameters]\")"
+    ]
+  }
+}

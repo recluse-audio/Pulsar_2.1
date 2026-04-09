@@ -19,18 +19,14 @@ public:
     void prepare(double sampleRate);
     void startTrain();
   
-    void update(AudioProcessorValueTreeState& apvts);
+    void doParameterChanged(const juce::String& parameterID, float newValue);
     void triggerPulsaret();
     void generateNextBlock(juce::AudioBuffer<float>& buffer);
-    
-    void setSmoothedFundamental(float fundFreq);
     
     int  getPeriod();
     bool needsCalculation = false;
 
     void flipFlashStateAtHalfPulsarPeriod();
-    
-    void updateFundamental(float freq);
 
     void calculateRanges();
     
@@ -61,7 +57,7 @@ public:
 
     void setTempo(double tempo, int timeSigNum, int timeSigDenom);
 
-    bool isSynchronized() { return inSyncMode;  }
+    bool isSynchronized() { return inSyncMode.get(); }
 
 private:
     int flashCountdown = 2048;
@@ -80,10 +76,10 @@ private:
     bool isContinuous = false;
     
     int  flag = 0;
-    float attack;
-    float decay;
-    float sustain;
-    float release;
+    Atomic<float> attack  { 100.f };
+    Atomic<float> decay   { 50.f };
+    Atomic<float> sustain { 0.5f };
+    Atomic<float> release { 500.f };
     
     float pulsaretWidth = 0.1f;
     
@@ -92,13 +88,13 @@ private:
     bool isRunning = false;
     
     
-    int triggerOn = 1;
+    Atomic<int>  triggerOn  { 1 };
 
     int onCount = 1;
-    int triggerOff = 0;
+    Atomic<int>  triggerOff { 0 };
 
     int offCount = 0;
-    bool isTriggerPattern = true;
+    Atomic<bool> isTriggerPattern { true };
     bool trigger;
 
     double mSampleRate;
@@ -122,11 +118,11 @@ private:
 
     Atomic<float> mFundFreq          { 40.0f };
     Atomic<float> mFundSpread        { 0.0f };
-    Atomic<float> mFundRand          { 0.05 };
+    Atomic<float> mFundRand          { 0.05f };
     juce::Random randFund;
     Atomic<bool> fundIsSpread        { false };
     juce::Range<int> fundRange;
-    bool inSyncMode{ false };
+    Atomic<bool> inSyncMode { false };
 
     
     Atomic<float> panL               { 1.f };
@@ -143,5 +139,11 @@ private:
     
     juce::SmoothedValue<float, ValueSmoothingTypes::Multiplicative> smoothFund;
     juce::SmoothedValue<float, ValueSmoothingTypes::Multiplicative> smoothAmp;
+
+    Atomic<float> fundFreqTarget   { 5.0f };
+    Atomic<float> mQueuedFundamental { 5.0f };
+    std::atomic<bool> fundFreqChanged  { false };
+    std::atomic<bool> rangesNeedRecalc { false };
+    std::atomic<bool> glideTimeChanged { false };
     
 };

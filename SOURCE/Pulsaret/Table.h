@@ -22,25 +22,22 @@ public:
     AudioBuffer<float>& getTable0();
     AudioBuffer<float>& getTable1();
     float getWaveFraction();
-    void loadTablesFromDisk();
+    void generateBasicWaveforms();
 
     int getTableSize();
 
-    void createSinc();
 private:
     OwnedArray<AudioBuffer<float>, CriticalSection> tableArray;
-    int arraySize = 0; // stores actual number of samples in array
+    int arraySize = 0;
     juce::AudioBuffer<float> table0;
     juce::AudioBuffer<float> table1;
-
 
     AudioBuffer<float> interpolatedBuffer;
 
     Atomic<float> floatWaveIndex{ 0.f };
     Atomic<float> waveFraction{ 0.f };
     Atomic<float> normWaveIndex{ 0.f };
-    Atomic<int> intWaveIndex{ 0 }; // selected wavetable, rounded down
-    AudioFormatManager formatManager;
+    Atomic<int> intWaveIndex{ 0 };
 
     int tableSize = 2048;
 };

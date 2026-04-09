@@ -28,12 +28,12 @@ set(SOURCES
     SOURCE/LookNFeel/NameFeel.h
     SOURCE/LookNFeel/PulsarUIFeel.cpp
     SOURCE/LookNFeel/PulsarUIFeel.h
+    SOURCE/PULSAR_TRAIN/PulsarTrain.cpp
+    SOURCE/PULSAR_TRAIN/PulsarTrain.h
     SOURCE/Processor/PluginProcessor.cpp
     SOURCE/Processor/PluginProcessor.h
     SOURCE/Processor/TempoSync.cpp
     SOURCE/Processor/TempoSync.h
-    SOURCE/PULSAR_TRAIN/PulsarTrain.cpp
-    SOURCE/PULSAR_TRAIN/PulsarTrain.h
     SOURCE/PulsarSynthesiser.cpp
     SOURCE/PulsarSynthesiser.h
     SOURCE/Pulsaret/MidiTransformer.cpp
@@ -48,4 +48,5 @@ set(SOURCES
     SOURCE/Pulsaret/PulsaretTable.h
     SOURCE/Pulsaret/Table.cpp
     SOURCE/Pulsaret/Table.h
+    SOURCE/Util/Version.h
 )

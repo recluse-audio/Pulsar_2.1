@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PulsarControlsComponent.h"
+#include "../Processor/PluginProcessor.h"
 
 //==============================================================================
 PulsarControlsComponent::PulsarControlsComponent(PulsarAudioProcessor& p) : audioProcessor(p)
@@ -198,19 +199,21 @@ void PulsarControlsComponent::drawLabels()
 */
 void PulsarControlsComponent::attachToState()
 {
-    triggerAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.apvts, "Trigger", *triggerButton);
-    runAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.apvts, "Trigger", *runButton);
+    using namespace Pulsar;
 
-    interAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Intermittance", *interSlider);
-    triggerOnAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Trigger On", *triggerOnSlider);
-    triggerOffAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Trigger Off", *triggerOffSlider);
+    triggerAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.apvts, kTriggerID, *triggerButton);
+    runAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.apvts, kTriggerID, *runButton);
 
-    widthAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Width", *widthSlider);
+    interAttachment     = std::make_unique<Attachment>(audioProcessor.apvts, kIntermittanceID, *interSlider);
+    triggerOnAttachment = std::make_unique<Attachment>(audioProcessor.apvts, kTriggerOnID,     *triggerOnSlider);
+    triggerOffAttachment= std::make_unique<Attachment>(audioProcessor.apvts, kTriggerOffID,    *triggerOffSlider);
 
-    attackAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Attack", *attackSlider);
-    decayAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Decay", *decaySlider);
-    sustainAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Sustain Level", *sustainSlider);
-    releaseAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Release", *releaseSlider);
+    widthAttachment   = std::make_unique<Attachment>(audioProcessor.apvts, kWidthID,       *widthSlider);
 
-    glideAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "Glide Time", *glideSlider);
+    attackAttachment  = std::make_unique<Attachment>(audioProcessor.apvts, kAttackID,      *attackSlider);
+    decayAttachment   = std::make_unique<Attachment>(audioProcessor.apvts, kDecayID,       *decaySlider);
+    sustainAttachment = std::make_unique<Attachment>(audioProcessor.apvts, kSustainLevelID,*sustainSlider);
+    releaseAttachment = std::make_unique<Attachment>(audioProcessor.apvts, kReleaseID,     *releaseSlider);
+
+    glideAttachment   = std::make_unique<Attachment>(audioProcessor.apvts, kGlideTimeID,   *glideSlider);
 }

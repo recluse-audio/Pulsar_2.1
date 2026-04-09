@@ -86,19 +86,19 @@ public:
         switch (currentDemo)
         {
         case 0:
-            param = audioProcessor.apvts.getParameter("Fundamental Freq");
+            param = audioProcessor.apvts.getParameter(Pulsar::kFundamentalFreqID);
             fundamentalDemo();
             break;
         case 1:
-            param = audioProcessor.apvts.getParameter("Formant Freq");
+            param = audioProcessor.apvts.getParameter(Pulsar::kFormantFreqID);
             formantDemo();
             break;
         case 2:
-            param = audioProcessor.apvts.getParameter("Wave Type");
+            param = audioProcessor.apvts.getParameter(Pulsar::kWaveTypeID);
             waveDemo();
             break;
         case 3:
-            param = audioProcessor.apvts.getParameter("Pan");
+            param = audioProcessor.apvts.getParameter(Pulsar::kPanID);
             panDemo();
             break;
         }

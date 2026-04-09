@@ -9,6 +9,7 @@
 */
 
 #include "PulsarTrain.h"
+#include "../Processor/PluginProcessor.h"
 
 PulsarTrain::PulsarTrain()
 {
@@ -63,7 +64,7 @@ int PulsarTrain::getPeriod()
     if(fundIsSpread.get() && randFund.nextFloat() <= mFundRand.get())
         freq = randFund.nextInt(fundRange);
     
-    if (inSyncMode)
+    if (inSyncMode.get())
     {
         freq = tempoSync.getSynchronizedFreq(freq);
        
@@ -77,85 +78,43 @@ int PulsarTrain::getPeriod()
 }
 /*========================================================================*/
 
-/*========================================================================*/
-
-
-void PulsarTrain::update(AudioProcessorValueTreeState& apvts)
+//==============================================================================
+void PulsarTrain::doParameterChanged (const juce::String& parameterID, float newValue)
 {
-    pulsaretFactory.update(apvts);
+    using namespace Pulsar;
 
-
-    auto fund = apvts.getRawParameterValue("Fundamental Freq");
-    float f = *fund;
-
-    auto fSpread = apvts.getRawParameterValue("Fundamental Spread");
-    auto fRand = apvts.getRawParameterValue("Fundamental Random");
-
-    auto p = apvts.getRawParameterValue("Pan");
-    auto pSpread = apvts.getRawParameterValue("Pan Spread");
-    auto pRand = apvts.getRawParameterValue("Pan Random");
-    auto a = apvts.getRawParameterValue("Amp");
-    auto aSpread = apvts.getRawParameterValue("Amp Spread");
-    auto aRand = apvts.getRawParameterValue("Amp Random");
-
-
-    auto inter = apvts.getRawParameterValue("Intermittance");
-
-    auto atk = apvts.getRawParameterValue("Attack");
-    auto dec = apvts.getRawParameterValue("Decay");
-    auto sus = apvts.getRawParameterValue("Sustain Level");
-    auto rel = apvts.getRawParameterValue("Release");
-
-    auto trig = apvts.getRawParameterValue("Trigger");
-
-    auto gTime = apvts.getRawParameterValue("Glide Time");
-
-    auto on = apvts.getRawParameterValue("Trigger On");
-    auto off = apvts.getRawParameterValue("Trigger Off");
-
-    auto rhythmic = apvts.getRawParameterValue("Rhythmic Grid Mode");
-
-    
-    if (*rhythmic > 0.f)
+    if (parameterID == kFundamentalFreqID)
     {
-        inSyncMode = true;
+        mQueuedFundamental = newValue;
+        fundFreqChanged    = true;
+        rangesNeedRecalc   = true;
     }
+    else if (parameterID == kFundamentalSpreadID) { mFundSpread = newValue; rangesNeedRecalc = true; }
+    else if (parameterID == kFundamentalRandomID)   mFundRand = newValue;
+    else if (parameterID == kRhythmicGridModeID)    inSyncMode = (newValue > 0.5f);
+    else if (parameterID == kPanID)
+    {
+        panR = newValue;
+        panL = 100.f - newValue;
+        rangesNeedRecalc = true;
+    }
+    else if (parameterID == kPanSpreadID)  { panSpread = newValue; rangesNeedRecalc = true; }
+    else if (parameterID == kPanRandomID)    panRand = newValue;
+    else if (parameterID == kAmpID)        { mAmp = newValue; rangesNeedRecalc = true; }
+    else if (parameterID == kAmpSpreadID)  { mAmpSpread = newValue; rangesNeedRecalc = true; }
+    else if (parameterID == kAmpRandomID)    mAmpRand = newValue;
+    else if (parameterID == kIntermittanceID) intermittance = newValue;
+    else if (parameterID == kTriggerOnID)    setTrigger((int)newValue, triggerOff.get());
+    else if (parameterID == kTriggerOffID)   setTrigger(triggerOn.get(), (int)newValue);
+    else if (parameterID == kGlideTimeID)  { glideTime = newValue; glideTimeChanged = true; }
+    else if (parameterID == kAttackID)       attack = newValue;
+    else if (parameterID == kDecayID)        decay = newValue;
+    else if (parameterID == kSustainLevelID) sustain = newValue;
+    else if (parameterID == kReleaseID)      release = newValue;
     else
-    {
-        inSyncMode = false;
-    }
-    
-
-    updateFundamental(f);
-    mFundSpread = *fSpread;
-    mFundRand = *fRand;
-
-    panR = *p;
-    panL = 100.f - panR.get();
-    panSpread = *pSpread;
-    panRand = *pRand;
-
-    mAmp = *a;
-    mAmpSpread = *aSpread;
-    mAmpRand = *aRand;
-
-    intermittance = *inter;
-
-    attack = *atk;
-    decay = *dec;
-    sustain = *sus;
-    release = *rel;
-
-    glideTime = *gTime;
-    setGlideTime(glideTime.get());
-
-
-    setTrigger(*on, *off); // poor name, for a trigger pattern will change
-    calculateRanges();
-
-
-
+        pulsaretFactory.doParameterChanged(parameterID, newValue);
 }
+
 
 void PulsarTrain::triggerPulsaret()
 {
@@ -168,11 +127,6 @@ void PulsarTrain::triggerPulsaretWithNoAmp()
     pulsaret2.setAsMiss();
 }
 
-void PulsarTrain::updateFundamental(float freq)
-{
-    pulsarPeriod = (1 / mFundFreq.get()) * mSampleRate;
-    smoothFund.setTargetValue(freq);
-}
 
 PulsaretTable& PulsarTrain::getPulsaretTable()
 {
@@ -192,6 +146,15 @@ void PulsarTrain::setTempo(double tempo, int timeSigNum, int timeSigDenom)
 
 void PulsarTrain::generateNextBlock(juce::AudioBuffer<float>& buffer)
 {
+    if (fundFreqChanged.exchange(false))
+        smoothFund.setTargetValue(mQueuedFundamental.get());
+
+    if (glideTimeChanged.exchange(false))
+        setGlideTime(glideTime.get());
+
+    if (rangesNeedRecalc.exchange(false))
+        calculateRanges();
+
     auto buffWrite = buffer.getArrayOfWritePointers();
 
     for (int i = 0; i < buffer.getNumSamples(); ++i)
@@ -293,10 +256,6 @@ void PulsarTrain::triggerRelease()
 
 
 
-void PulsarTrain::setSmoothedFundamental(float fundFreq)
-{
-    smoothFund.setTargetValue(fundFreq);
-}
 
 void PulsarTrain::setTrigger(int on, int off)
 {
@@ -304,12 +263,11 @@ void PulsarTrain::setTrigger(int on, int off)
     {
         isTriggerPattern = false;
     }
-    if (off > 0)
+    else
     {
-        isTriggerPattern = true;
-
-        triggerOn = on;
+        triggerOn  = on;
         triggerOff = off;
+        isTriggerPattern = true;
     }
 }
 
@@ -322,10 +280,10 @@ void PulsarTrain::setGlideTime(float glideTime)
 
 void PulsarTrain::setEnv()
 {
-    envParam.attack = attack / 1000.f;
-    envParam.decay = decay / 1000.f;
-    envParam.sustain = sustain;
-    envParam.release = release / 1000.f;
+    envParam.attack  = attack.get()  / 1000.f;
+    envParam.decay   = decay.get()   / 1000.f;
+    envParam.sustain = sustain.get();
+    envParam.release = release.get() / 1000.f;
     env.setParameters(envParam);
 }
 
@@ -381,7 +339,7 @@ void PulsarTrain::calculateRanges()
 
 void PulsarTrain::setPulsaretParamsAndTrigger()
 {
-    if (isTriggerPattern) // we are in a triggerPattern
+    if (isTriggerPattern.get()) // we are in a triggerPattern
     {
         if (onCount > 0)
         {
@@ -420,12 +378,12 @@ void PulsarTrain::setPulsaretParamsAndTrigger()
 
         if (onCount <= 0 && offCount < 0)
         {
-            onCount = triggerOn;
-            offCount = triggerOff;
+            onCount = triggerOn.get();
+            offCount = triggerOff.get();
         }
     }
 
-    if (!isTriggerPattern) // we are NOT in a triggerPattern but still might need randomized values
+    if (!isTriggerPattern.get()) // we are NOT in a triggerPattern but still might need randomized values
     {
 
         if (randInter.nextFloat() <= intermittance.get())

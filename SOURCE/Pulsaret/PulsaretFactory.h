@@ -23,7 +23,7 @@ public:
     PulsaretFactory();
     ~PulsaretFactory();
 
-    void update(AudioProcessorValueTreeState& apvts);
+    void doParameterChanged(const juce::String& parameterID, float newValue);
 
     void prepare(double sampleRate);
 
@@ -31,8 +31,6 @@ public:
     void calculateFreq(OwnedPulsaret& p1, OwnedPulsaret& p2);
     void calculateWave(OwnedPulsaret& p1, OwnedPulsaret& p2);
     void calculateRanges(OwnedPulsaret& p1, OwnedPulsaret& p2);
-
-    void updateFrequencies(float form1, float form2, bool foHarm, bool foHarm2);
 
     void setGlideTime(float seconds);
 
@@ -57,6 +55,8 @@ private:
     float pulsaretSamples2 = 1.f;
     float pulsarPeriodInSamples = 1024;
 
+    Atomic<float> mQueuedFormant1  { 600.0f };
+    std::atomic<bool> formant1Changed { false };
     Atomic<float> mFormFreq{ 600.0f };
     Atomic<float> mFormSpread{ 0.0f };
     Atomic<float> mFormRand{ 0.05 };
@@ -70,6 +70,8 @@ private:
     juce::Range<int>   formRange;
     juce::SmoothedValue<float, ValueSmoothingTypes::Linear> smoothForm;
 
+    Atomic<float> mQueuedFormant2  { 800.0f };
+    std::atomic<bool> formant2Changed { false };
     Atomic<float> mFormFreq2{ 800.0f };
     Atomic<float> mFormSpread2{ 0.f };
     Atomic<float> mFormRand2{ 0.05 };

@@ -22,10 +22,16 @@ PulsarAudioProcessor::PulsarAudioProcessor()
                        ), apvts(*this, nullptr, "Params", createParams())
 #endif
 {
+    for (auto* param : getParameters())
+        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(param))
+            apvts.addParameterListener(ranged->getParameterID(), this);
 }
 
 PulsarAudioProcessor::~PulsarAudioProcessor()
 {
+    for (auto* param : getParameters())
+        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(param))
+            apvts.removeParameterListener(ranged->getParameterID(), this);
 }
 
 
@@ -96,8 +102,15 @@ void PulsarAudioProcessor::changeProgramName (int index, const juce::String& new
 void PulsarAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     pulsarTrain.prepare(sampleRate);
-    update();
- }
+
+    // Sync all current param values into PulsarTrain now that sample rate is known
+    for (auto* param : getParameters())
+        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(param))
+        {
+            auto id = ranged->getParameterID();
+            pulsarTrain.doParameterChanged(id, *apvts.getRawParameterValue(id));
+        }
+}
 
 void PulsarAudioProcessor::releaseResources()
 {
@@ -155,8 +168,6 @@ void PulsarAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             }
         }
     }
-
-    update();
 
     for (auto it = midiMessages.findNextSamplePosition (0); it != midiMessages.cend(); ++it)
     {
@@ -247,11 +258,12 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 }
 
 
-
-void PulsarAudioProcessor::update()
+//==============================================================================
+void PulsarAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
-    pulsarTrain.update(apvts);
+    pulsarTrain.doParameterChanged(parameterID, newValue);
 }
+
 
 
 /*=============================================================================================*/
@@ -259,109 +271,98 @@ void PulsarAudioProcessor::update()
 juce::AudioProcessorValueTreeState::ParameterLayout PulsarAudioProcessor::createParams()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> parameters;
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Fundamental Freq", "Fundamental Freq",
-                                                                NormalisableRange<float> (1.f, 200.f, 1.f, 0.5f), 5.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Fundamental Spread", "Fundamental Spread",
-                                                                NormalisableRange<float> (1.f, 10.f, 0.001f, 0.5f), 1.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Fundamental Random", "Fundamental Random",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.001f, 1.f), 0.f));
-    
-    parameters.push_back(std::make_unique<AudioParameterBool>("Rhythmic Grid Mode", "Rhythmic Grid Mode", false));
 
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Formant Freq", "Formant Freq",
-                                                                NormalisableRange<float> (100.f, 10000.f, 1.f, 0.3f), 600.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Formant Spread", "Formant Spread",
-                                                                NormalisableRange<float> (1.f, 10.f, 0.001f, 1.f), 1.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Formant Random", "Formant Random",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.001f, 1.f), 0.f));
-    
-    parameters.push_back(std::make_unique<AudioParameterBool>("Formant Keylock Mode", "Formant Keylock Mode", false));
-    
-    parameters.push_back(std::make_unique<AudioParameterInt>("Form Key", "Form Key", 0, 11, 1));
+    using namespace Pulsar;
 
-    parameters.push_back(std::make_unique<AudioParameterInt>("Form Scale", "Form Scale", 0, 5, 1));
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFundamentalFreqID, "Fundamental Freq",
+        NormalisableRange<float>(1.f, 200.f, 1.f, 0.5f), 5.f));
 
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Formant Freq2", "Formant Freq2",
-                                                                NormalisableRange<float> (100.f, 10000.f, 1.f, 0.3f), 800.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Formant Spread2", "Formant Spread2",
-                                                                NormalisableRange<float> (1.f, 10.f, 0.001f, 1.f), 1.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Formant Random2", "Formant Random2",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.001f, 1.f), 0.f));
-    
-    parameters.push_back(std::make_unique<AudioParameterBool>("Formant2 Keylock Mode", "Formant2 Keylock Mode", false));
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFundamentalSpreadID, "Fundamental Spread",
+        NormalisableRange<float>(1.f, 10.f, 0.001f, 0.5f), 1.f));
 
-    parameters.push_back(std::make_unique<AudioParameterInt>("Form Key2", "Form Key2", 0, 11, 1));
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFundamentalRandomID, "Fundamental Random",
+        NormalisableRange<float>(0.f, 1.f, 0.001f, 1.f), 0.f));
 
-    parameters.push_back(std::make_unique<AudioParameterInt>("Form Scale2", "Form Scale2", 0, 5, 1));
+    parameters.push_back (std::make_unique<AudioParameterBool>(kRhythmicGridModeID, "Rhythmic Grid Mode", false));
 
-    
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Pan", "Pan",
-                                                                NormalisableRange<float> (0.0f, 100.f, 0.001f, 1.f), 50.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Pan Spread", "Pan Spread",
-                                                                NormalisableRange<float> (1.f, 100.f, 0.01f, 1.f), 1.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Pan Random", "Pan Random",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.01f, 1.f), 0.f));
-    
-    
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Wave Type", "Wave Type",
-                                                                NormalisableRange<float> (0.f, 99.f, 0.01f, 1.f), 50.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Wave Spread", "Wave Spread",
-                                                                NormalisableRange<float> (1.f, 100.f, 0.1f, 1.f), 1.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Wave Random", "Wave Random",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.001f, 1.f), 0.f));
-    
-    
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Amp", "Amp",
-                                                                NormalisableRange<float> (0.0f, 100.f, 0.1f, 1.f), 50.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Amp Spread", "Amp Spread",
-                                                                NormalisableRange<float> (1.f, 100.f, 0.1f, 1.f), 1.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Amp Random", "Amp Random",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.001f, 1.f), 0.00f));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Intermittance", "Intermittance",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.001f, 1.f), 1.f));
-    
-    parameters.push_back (std::make_unique<AudioParameterInt>("Trigger On", "Trigger On", 1, 10, 1));
-    
-    parameters.push_back (std::make_unique<AudioParameterInt>("Trigger Off", "Trigger Off", 0, 10, 0));
-    
-    parameters.push_back (std::make_unique<AudioParameterBool>("Trigger", "Trigger", false));
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Glide Time", "Glide Time", NormalisableRange<float> (10.f, 1000.f, 0.001f, 1.f), 50.f)); // in ms, converted later to sec
-    
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Width", "Width",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.001f, 1.f), 0.0f));
-    
-    
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Attack", "Attack",
-                                                                NormalisableRange<float> (0.f, 10000.f, 1.f, 0.5f), 100.f));
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Decay", "Decay",
-                                                                NormalisableRange<float> (0.f, 5000.f, 1.f, 0.5f), 50.f));
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Sustain Level", "Sustain Level",
-                                                                NormalisableRange<float> (0.f, 1.f, 0.01f, 1.f), 0.5f));
-    parameters.push_back (std::make_unique<AudioParameterFloat>("Release", "Release",
-                                                                NormalisableRange<float> (0.f, 10000.f, 1.f, 0.5f), 500.f));
-    
-    
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFormantFreqID, "Formant Freq",
+        NormalisableRange<float>(100.f, 10000.f, 1.f, 0.3f), 600.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFormantSpreadID, "Formant Spread",
+        NormalisableRange<float>(1.f, 10.f, 0.001f, 1.f), 1.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFormantRandomID, "Formant Random",
+        NormalisableRange<float>(0.f, 1.f, 0.001f, 1.f), 0.f));
+
+    parameters.push_back (std::make_unique<AudioParameterBool>(kFormantKeylockModeID, "Formant Keylock Mode", false));
+    parameters.push_back (std::make_unique<AudioParameterInt>(kFormKeyID, "Form Key", 0, 11, 1));
+    parameters.push_back (std::make_unique<AudioParameterInt>(kFormScaleID, "Form Scale", 0, 5, 1));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFormantFreq2ID, "Formant Freq2",
+        NormalisableRange<float>(100.f, 10000.f, 1.f, 0.3f), 800.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFormantSpread2ID, "Formant Spread2",
+        NormalisableRange<float>(1.f, 10.f, 0.001f, 1.f), 1.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kFormantRandom2ID, "Formant Random2",
+        NormalisableRange<float>(0.f, 1.f, 0.001f, 1.f), 0.f));
+
+    parameters.push_back (std::make_unique<AudioParameterBool>(kFormant2KeylockModeID, "Formant2 Keylock Mode", false));
+    parameters.push_back (std::make_unique<AudioParameterInt>(kFormKey2ID, "Form Key2", 0, 11, 1));
+    parameters.push_back (std::make_unique<AudioParameterInt>(kFormScale2ID, "Form Scale2", 0, 5, 1));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kPanID, "Pan",
+        NormalisableRange<float>(0.f, 100.f, 0.001f, 1.f), 50.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kPanSpreadID, "Pan Spread",
+        NormalisableRange<float>(1.f, 100.f, 0.01f, 1.f), 1.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kPanRandomID, "Pan Random",
+        NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 0.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kWaveTypeID, "Wave Type",
+        NormalisableRange<float>(0.f, 99.f, 0.01f, 1.f), 50.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kWaveSpreadID, "Wave Spread",
+        NormalisableRange<float>(1.f, 100.f, 0.1f, 1.f), 1.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kWaveRandomID, "Wave Random",
+        NormalisableRange<float>(0.f, 1.f, 0.001f, 1.f), 0.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kAmpID, "Amp",
+        NormalisableRange<float>(0.f, 100.f, 0.1f, 1.f), 50.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kAmpSpreadID, "Amp Spread",
+        NormalisableRange<float>(1.f, 100.f, 0.1f, 1.f), 1.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kAmpRandomID, "Amp Random",
+        NormalisableRange<float>(0.f, 1.f, 0.001f, 1.f), 0.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kIntermittanceID, "Intermittance",
+        NormalisableRange<float>(0.f, 1.f, 0.001f, 1.f), 1.f));
+
+    parameters.push_back (std::make_unique<AudioParameterInt>(kTriggerOnID, "Trigger On", 1, 10, 1));
+    parameters.push_back (std::make_unique<AudioParameterInt>(kTriggerOffID, "Trigger Off", 0, 10, 0));
+    parameters.push_back (std::make_unique<AudioParameterBool>(kTriggerID, "Trigger", false));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kGlideTimeID, "Glide Time",
+        NormalisableRange<float>(10.f, 1000.f, 0.001f, 1.f), 50.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kWidthID, "Width",
+        NormalisableRange<float>(0.f, 1.f, 0.001f, 1.f), 0.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kAttackID, "Attack",
+        NormalisableRange<float>(0.f, 10000.f, 1.f, 0.5f), 100.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kDecayID, "Decay",
+        NormalisableRange<float>(0.f, 5000.f, 1.f, 0.5f), 50.f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kSustainLevelID, "Sustain Level",
+        NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 0.5f));
+
+    parameters.push_back (std::make_unique<AudioParameterFloat>(kReleaseID, "Release",
+        NormalisableRange<float>(0.f, 10000.f, 1.f, 0.5f), 500.f));
+
     return { parameters.begin(), parameters.end() };
 }
 

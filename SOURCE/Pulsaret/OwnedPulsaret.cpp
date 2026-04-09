@@ -14,7 +14,7 @@ OwnedPulsaret::OwnedPulsaret()
 {
     //setLengthInSamples(table.getTableSize());
     //pulsaretTable.createTables();
-    table.loadTablesFromDisk();
+    //table.loadTablesFromDisk();
     tableSize = table.getTableSize();
     env.setTableSize(table.getTableSize());
 

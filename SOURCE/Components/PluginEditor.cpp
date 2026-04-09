@@ -74,46 +74,48 @@ void PulsarAudioProcessorEditor::resetSliders()
     fundamentalSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Fundamental, "Fund", true, "Grid", false);
     addAndMakeVisible(fundamentalSlider.get());
     fundamentalSlider->setBoundsRelative(0.05, 0.15, 0.15, 0.45);
+    using namespace Pulsar;
+
     fundamentalSlider->attachToState(audioProcessor.apvts,
-        "Fundamental Freq", "Fundamental Spread",
-        "Fundamental Random", "Rhythmic Grid Mode");
+        kFundamentalFreqID, kFundamentalSpreadID,
+        kFundamentalRandomID, kRhythmicGridModeID);
 
     formantSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Formant, "Form", true, "Key", true);
     addAndMakeVisible(formantSlider.get());
     formantSlider->setBoundsRelative(0.2, 0.15, 0.15, 0.45);
     formantSlider->attachToState(audioProcessor.apvts,
-        "Formant Freq", "Formant Spread",
-        "Formant Random", "Formant Keylock Mode",
-        "Form Key", "Form Scale");
+        kFormantFreqID, kFormantSpreadID,
+        kFormantRandomID, kFormantKeylockModeID,
+        kFormKeyID, kFormScaleID);
 
     formantSlider2 = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Formant, "Form2", true, "Key", true);
     addAndMakeVisible(formantSlider2.get());
     formantSlider2->setBoundsRelative(0.35, 0.15, 0.15, 0.45);
     formantSlider2->attachToState(audioProcessor.apvts,
-        "Formant Freq2", "Formant Spread2",
-        "Formant Random2", "Formant2 Keylock Mode",
-        "Form Key2", "Form Scale2");
+        kFormantFreq2ID, kFormantSpread2ID,
+        kFormantRandom2ID, kFormant2KeylockModeID,
+        kFormKey2ID, kFormScale2ID);
 
     waveSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Standard, "Wave",
         false, "", false);
     addAndMakeVisible(waveSlider.get());
     waveSlider->setBoundsRelative(0.5, 0.15, 0.15, 0.45);
     waveSlider->attachToState(audioProcessor.apvts,
-        "Wave Type", "Wave Spread", "Wave Random");
+        kWaveTypeID, kWaveSpreadID, kWaveRandomID);
 
     ampSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Standard, "Amp",
-        false, "", false); // don't know how to set defaults correctly
+        false, "", false);
     addAndMakeVisible(ampSlider.get());
     ampSlider->setBoundsRelative(0.65, 0.15, 0.15, 0.45);
     ampSlider->attachToState(audioProcessor.apvts,
-        "Amp", "Amp Spread", "Amp Random");
+        kAmpID, kAmpSpreadID, kAmpRandomID);
 
     panSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Horizontal, "Pan",
         false, "", false);
     addAndMakeVisible(panSlider.get());
     panSlider->setBoundsRelative(0.25f, 0.625f, 0.55f, 0.13f);
     panSlider->attachToState(audioProcessor.apvts,
-        "Pan", "Pan Spread", "Pan Random");
+        kPanID, kPanSpreadID, kPanRandomID);
 
 
 

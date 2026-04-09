@@ -9,6 +9,7 @@
 */
 
 #include "PulsaretFactory.h"
+#include "../Processor/PluginProcessor.h"
 
 PulsaretFactory::PulsaretFactory() : frequencyOfA(440.0)
 {
@@ -16,50 +17,26 @@ PulsaretFactory::PulsaretFactory() : frequencyOfA(440.0)
 
 PulsaretFactory::~PulsaretFactory(){}
 
-void PulsaretFactory::update(AudioProcessorValueTreeState& apvts)
+void PulsaretFactory::doParameterChanged(const juce::String& parameterID, float newValue)
 {
-    auto foFreq = apvts.getRawParameterValue("Formant Freq");
-    auto foSpread = apvts.getRawParameterValue("Formant Spread");
-    auto foRand = apvts.getRawParameterValue("Formant Random");
-    auto foHarm = apvts.getRawParameterValue("Formant Keylock Mode");
+    using namespace Pulsar;
 
-    auto foFreq2 = apvts.getRawParameterValue("Formant Freq2");
-    auto foSpread2 = apvts.getRawParameterValue("Formant Spread2");
-    auto foRand2 = apvts.getRawParameterValue("Formant Random2");
-    auto foHarm2 = apvts.getRawParameterValue("Formant2 Keylock Mode");
-
-    auto w = apvts.getRawParameterValue("Wave Type");
-    auto wSpread = apvts.getRawParameterValue("Wave Spread");
-    auto wRand = apvts.getRawParameterValue("Wave Random");
-
-    auto key1 = apvts.getRawParameterValue("Form Key");
-    auto key2 = apvts.getRawParameterValue("Form Key2");
-
-    auto scale1 = apvts.getRawParameterValue("Form Scale");
-    auto scale2 = apvts.getRawParameterValue("Form Scale2");
-
-    auto wid = apvts.getRawParameterValue("Width");
-
-
-
-    mFormKey = *key1;
-    mFormKey2 = *key2;
-
-    mFormScale = *scale1;
-    mFormScale2 = *scale2;
-
-    updateFrequencies(*foFreq, *foFreq2, *foHarm, *foHarm2);
-
-    mFormSpread = *foSpread;
-    mFormRand = *foRand;
-
-    mFormSpread2 = *foSpread2;
-    mFormRand2 = *foRand2;
-
-    waveType = *w;
-    waveSpread = *wSpread;
-    waveRand = *wRand;
-
+    if      (parameterID == kFormantFreqID)           { mQueuedFormant1 = newValue; formant1Changed = true; }
+    else if (parameterID == kFormantSpreadID)         mFormSpread = newValue;
+    else if (parameterID == kFormantRandomID)         mFormRand = newValue;
+    else if (parameterID == kFormantKeylockModeID)    formIsHarm = (newValue > 0.5f);
+    else if (parameterID == kFormKeyID)               mFormKey = (int)newValue;
+    else if (parameterID == kFormScaleID)             mFormScale = (int)newValue;
+    else if (parameterID == kFormantFreq2ID)          { mQueuedFormant2 = newValue; formant2Changed = true; }
+    else if (parameterID == kFormantSpread2ID)        mFormSpread2 = newValue;
+    else if (parameterID == kFormantRandom2ID)        mFormRand2 = newValue;
+    else if (parameterID == kFormant2KeylockModeID)   formIsHarm2 = (newValue > 0.5f);
+    else if (parameterID == kFormKey2ID)              mFormKey2 = (int)newValue;
+    else if (parameterID == kFormScale2ID)            mFormScale2 = (int)newValue;
+    else if (parameterID == kWaveTypeID)              waveType = newValue;
+    else if (parameterID == kWaveSpreadID)            waveSpread = newValue;
+    else if (parameterID == kWaveRandomID)            waveRand = newValue;
+    else if (parameterID == kWidthID)                 width = newValue;
 }
 
 void PulsaretFactory::prepare(double sampleRate)
@@ -200,15 +177,6 @@ void PulsaretFactory::calculateRanges(OwnedPulsaret& p1, OwnedPulsaret& p2)
 
 
 
-void PulsaretFactory::updateFrequencies(float form1, float form2, bool foHarm, bool foHarm2)
-{
-    formIsHarm = foHarm;
-    formIsHarm2 = foHarm2;
-   
-
-    smoothForm.setTargetValue(form1);
-    smoothForm2.setTargetValue(form2);
-}
 
 void PulsaretFactory::calculateDutyCycle(float wid)
 {
@@ -237,7 +205,12 @@ void PulsaretFactory::passPulsarPeriod(float pulsarPeriod)
 
 void PulsaretFactory::nextSmoothValue()
 {
-    mFormFreq = smoothForm.getNextValue();
+    if (formant1Changed.exchange(false))
+        smoothForm.setTargetValue(mQueuedFormant1.get());
+    if (formant2Changed.exchange(false))
+        smoothForm2.setTargetValue(mQueuedFormant2.get());
+
+    mFormFreq  = smoothForm.getNextValue();
     mFormFreq2 = smoothForm2.getNextValue();
 }
 
