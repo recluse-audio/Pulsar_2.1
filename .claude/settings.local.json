@@ -6,7 +6,8 @@
       "Bash(python HELPER_SCRIPTS/rebuild_all.py)",
       "Bash(python HELPER_SCRIPTS/build_tests.py)",
       "Bash(python HELPER_SCRIPTS/build_vst3.py)",
-      "Bash(./BUILD/Debug/Tests.exe \"[Parameters]\")"
+      "Bash(./BUILD/Debug/Tests.exe \"[Parameters]\")",
+      "Bash(C:/Program Files \\(x86\\)/Inno Setup 6/ISCC.exe:*)"
     ]
   }
 }
