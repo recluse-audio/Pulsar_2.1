@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import shutil
 import subprocess
 import sys
@@ -41,12 +42,6 @@ def find_cmake() -> str:
     raise FileNotFoundError("Could not find cmake on this machine.")
 
 
-def get_generator() -> str:
-    if sys.platform.startswith("win"):
-        return "Ninja"
-    return "Unix Makefiles"
-
-
 def run(cmd: list[str], cwd: Path) -> None:
     print("+", " ".join(cmd))
     subprocess.run(cmd, cwd=str(cwd), check=True)
@@ -59,31 +54,41 @@ def regenerate() -> None:
         subprocess.run([sys.executable, str(regen)], check=True)
 
 
+def parse_args() -> argparse.Namespace:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--config",
+        choices=["Debug", "Release"],
+        default="Release",
+        help="Build config (default: Release)",
+    )
+    return ap.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
+
     root = Path(__file__).resolve().parents[1]
     build = root / "BUILD"
     cmake = find_cmake()
-    generator = get_generator()
 
     print(f"Using cmake: {cmake}")
-    print(f"Using generator: {generator}")
+    print(f"Using config: {args.config}")
 
     regenerate()
 
-    if build.exists():
-        shutil.rmtree(build)
-
     build.mkdir(parents=True, exist_ok=True)
 
-    run(
-        [
-            cmake,
-            "-S", str(root),
-            "-B", str(build),
-            "-G", generator,
-        ],
-        cwd=root,
-    )
+    configure_cmd = [
+        cmake,
+        "-S", str(root),
+        "-B", str(build),
+    ]
+
+    if not sys.platform.startswith("win"):
+        configure_cmd += [f"-DCMAKE_BUILD_TYPE={args.config}"]
+
+    run(configure_cmd, cwd=root)
 
     build_cmd = [
         cmake,
@@ -92,7 +97,7 @@ def main() -> int:
     ]
 
     if sys.platform.startswith("win"):
-        build_cmd += ["--config", "Debug"]
+        build_cmd += ["--config", args.config]
 
     run(build_cmd, cwd=root)
     return 0

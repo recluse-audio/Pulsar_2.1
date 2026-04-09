@@ -1,17 +1,4 @@
 #!/usr/bin/env python3
-"""
-Cross-platform CMake build script (macOS / Windows / Linux).
-
-Equivalent to:
-  pushd BUILD
-  cmake ..
-  cmake --build . --target Pulsar_Standalone [--config Debug|Release]
-  popd
-
-Usage:
-  python build_standalone.py
-  python build_standalone.py --config Release
-"""
 
 from __future__ import annotations
 
@@ -39,25 +26,51 @@ def regenerate_cmake_lists() -> None:
         print("Warning: regenSource.py not found, skipping regeneration")
 
 
-def main() -> int:
+def parse_args() -> argparse.Namespace:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--config", default="Debug", help="Build config: Debug or Release (default: Debug)")
-    args = ap.parse_args()
+    ap.add_argument(
+        "--config",
+        choices=["Debug", "Release"],
+        default="Release",
+        help="Build config (default: Release)",
+    )
+    return ap.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
 
     regenerate_cmake_lists()
 
-    build_dir = Path("BUILD").resolve()
-    if not build_dir.exists():
-        raise FileNotFoundError("BUILD directory does not exist")
+    root = Path(__file__).resolve().parents[1]
+    build_dir = root / "BUILD"
+    build_dir.mkdir(parents=True, exist_ok=True)
 
     cmake = find_cmake()
-    run([cmake, ".."], cwd=build_dir)
+    print(f"Using cmake: {cmake}")
+    print(f"Using config: {args.config}")
 
-    build_cmd = [cmake, "--build", ".", "--target", f"{PLUGIN_NAME}_Standalone"]
+    configure_cmd = [
+        cmake,
+        "-S", str(root),
+        "-B", str(build_dir),
+    ]
+
+    if not sys.platform.startswith("win"):
+        configure_cmd += [f"-DCMAKE_BUILD_TYPE={args.config}"]
+
+    run(configure_cmd, cwd=root)
+
+    build_cmd = [
+        cmake,
+        "--build", str(build_dir),
+        "--target", f"{PLUGIN_NAME}_Standalone",
+    ]
+
     if sys.platform.startswith("win"):
         build_cmd += ["--config", args.config]
 
-    run(build_cmd, cwd=build_dir)
+    run(build_cmd, cwd=root)
     return 0
 
 
