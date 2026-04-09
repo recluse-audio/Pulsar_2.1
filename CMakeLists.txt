@@ -28,7 +28,7 @@ find_package(Python3 REQUIRED)
 add_subdirectory(SUBMODULES/JUCE)
 
 # Plugin formats to build
-set(FORMATS VST3 Standalone)
+set(FORMATS VST3 AU Standalone)
 
 # Create version header before building
 add_custom_target(update_version_header
