@@ -24,25 +24,25 @@ PulsarAudioProcessorEditor::PulsarAudioProcessorEditor (PulsarAudioProcessor& p)
     resetSliders();
     init();
 
-    menuBar.reset(new MenuBarComponent(this));
-    addAndMakeVisible(menuBar.get());
+    // menuBar.reset(new MenuBarComponent(this));
+    // addAndMakeVisible(menuBar.get());
 
-    setApplicationCommandManagerToWatch(&commandManager);
-    commandManager.registerAllCommandsForTarget(this);
+    // setApplicationCommandManagerToWatch(&commandManager);
+    // commandManager.registerAllCommandsForTarget(this);
 
-    addKeyListener(commandManager.getKeyMappings());
+    // addKeyListener(commandManager.getKeyMappings());
 
-    addChildComponent(menuHeader);
+    // addChildComponent(menuHeader);
 
-    commandRunner = std::make_unique<CommandRunnerComponent>(audioProcessor);
-    commandRunner->setBounds(frame);
+    // commandRunner = std::make_unique<CommandRunnerComponent>(audioProcessor);
+    // commandRunner->setBounds(frame);
 
-    addChildComponent(commandRunner.get());
-    addAndMakeVisible(burgerMenu);
-    addAndMakeVisible(sidePanel);
-    
-    burgerMenu.setModel(this);
-    setBurgerMenuPosition();
+    // addChildComponent(commandRunner.get());
+    // addAndMakeVisible(burgerMenu);
+    // addAndMakeVisible(sidePanel);
+
+    // burgerMenu.setModel(this);
+    // setBurgerMenuPosition();
 
     setWantsKeyboardFocus(true);
 
@@ -139,7 +139,7 @@ void PulsarAudioProcessorEditor::paint (juce::Graphics& g)
 
 void PulsarAudioProcessorEditor::resized()
 {
-    menuHeader.setBounds(540, 12, 30, 30);
+    // menuHeader.setBounds(540, 12, 30, 30);
 }
 
 
@@ -168,166 +168,113 @@ void PulsarAudioProcessorEditor::timerCallback()
 }
 
 
-PopupMenu PulsarAudioProcessorEditor::getMenuForIndex(int menuIndex, const String& /*menuName*/)
-{
-    // pop up menus have 'Options' which allow you to call 'drawPopupMenuWithOptions()' as a lnf class.  
-    // With too few items, this menu will expose the defaul coloring of the region below it.  look into this
-    // All this to say that menus will only draw as tall as necessary unless you force them to be the correct height.  
-    PopupMenu menu; 
-    
-    menu.setLookAndFeel(&pulsarFeel);
+// PopupMenu PulsarAudioProcessorEditor::getMenuForIndex(int menuIndex, const String& /*menuName*/)
+// {
+//     PopupMenu menu;
+//     menu.setLookAndFeel(&pulsarFeel);
+//     if (menuIndex == 0)
+//     {
+//         menu.addCommandItem(&commandManager, CommandIDs::freshStart);
+//         menu.addCommandItem(&commandManager, CommandIDs::loadPreset);
+//         menu.addCommandItem(&commandManager, CommandIDs::loadUserPreset);
+//     }
+//     if (menuIndex == 1)
+//     {
+//         menu.addCommandItem(&commandManager, CommandIDs::explainPulsarSynthesis);
+//         menu.addCommandItem(&commandManager, CommandIDs::parametersExplained);
+//     }
+//     return menu;
+// }
 
-    if (menuIndex == 0)
-    {
-        menu.addCommandItem(&commandManager, CommandIDs::freshStart);
-        menu.addCommandItem(&commandManager, CommandIDs::loadPreset);
-        menu.addCommandItem(&commandManager, CommandIDs::loadUserPreset);
-    }
+// ApplicationCommandTarget* PulsarAudioProcessorEditor::getNextCommandTarget()
+// {
+//     return nullptr;
+// }
 
-    if (menuIndex == 1)
-    {
-        menu.addCommandItem(&commandManager, CommandIDs::explainPulsarSynthesis);
-        menu.addCommandItem(&commandManager, CommandIDs::parametersExplained);
-        //menu.addCommandItem(&commandManager, CommandIDs::testBasicOperation);
-    }
+// void PulsarAudioProcessorEditor::getAllCommands(Array<CommandID>& c)
+// {
+//     Array<CommandID> commands
+//     {
+//         CommandIDs::freshStart,
+//         CommandIDs::loadPreset,
+//         CommandIDs::loadUserPreset,
+//         CommandIDs::explainPulsarSynthesis,
+//         CommandIDs::parametersExplained,
+//     };
+//     c.addArray(commands);
+// }
 
-    //if (menuIndex == 2)
-    //{
-    //    menu.addCommandItem(&commandManager, CommandIDs::loadAboutPage);
-    //    menu.addCommandItem(&commandManager, CommandIDs::loadFoundersAppreciation);
-    //}
-    
+// void PulsarAudioProcessorEditor::getCommandInfo(CommandID commandID, ApplicationCommandInfo& result)
+// {
+//     switch (commandID)
+//     {
+//     case CommandIDs::freshStart:
+//         result.setInfo("Start Fresh", "Mode designed for basic Pulsar operation.", "Menu", 0);
+//         result.setTicked(false);
+//         break;
+//     case CommandIDs::loadPreset:
+//         result.setInfo("Signature Presets", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
+//         result.setTicked(false);
+//         break;
+//     case CommandIDs::loadUserPreset:
+//         result.setInfo("User Preset", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
+//         result.setTicked(false);
+//         break;
+//     case CommandIDs::explainPulsarSynthesis:
+//         result.setInfo("Pulsar Synthesis Overview", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
+//         result.setTicked(false);
+//         break;
+//     case CommandIDs::parametersExplained:
+//         result.setInfo("Parameter Dictionary", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
+//         result.setTicked(false);
+//         break;
+//     default:
+//         break;
+//     }
+// }
 
-    return menu;
-}
+// bool PulsarAudioProcessorEditor::perform(const InvocationInfo& info)
+// {
+//     switch (info.commandID)
+//     {
+//     case CommandIDs::freshStart:
+//         commandRunner->setVisible(false);
+//         audioProcessor.loadPreset(String("C:/ProgramData/Recluse-Audio/Pulsar/Presets/Default"));
+//         break;
+//     case CommandIDs::loadPreset:
+//         commandRunner->setVisible(true);
+//         sidePanel.showOrHide(false);
+//         commandRunner->startPresetMenu();
+//         break;
+//     case CommandIDs::loadUserPreset:
+//         commandRunner->setVisible(true);
+//         sidePanel.showOrHide(false);
+//         commandRunner->startUserPresetMenu();
+//         break;
+//     case CommandIDs::explainPulsarSynthesis:
+//         commandRunner->setVisible(true);
+//         sidePanel.showOrHide(false);
+//         commandRunner->startTutorial();
+//         break;
+//     case CommandIDs::parametersExplained:
+//         commandRunner->setVisible(true);
+//         sidePanel.showOrHide(false);
+//         commandRunner->startParameterDemo();
+//         break;
+//     default:
+//         return false;
+//     }
+//     return true;
+// }
 
-ApplicationCommandTarget* PulsarAudioProcessorEditor::getNextCommandTarget()
-{
-    return nullptr; // might be a weird spot to check out
-}
-
-void PulsarAudioProcessorEditor::getAllCommands(Array<CommandID>& c)
-{
-    Array<CommandID> commands
-    { 
-        CommandIDs::freshStart,
-        CommandIDs::loadPreset,
-        CommandIDs::loadUserPreset,
-        CommandIDs::explainPulsarSynthesis,
-        CommandIDs::parametersExplained,
-        //CommandIDs::testBasicOperation,
-        //CommandIDs::loadAboutPage,
-        //CommandIDs::loadFoundersAppreciation
-    };
-    c.addArray(commands);
-}
-
-void PulsarAudioProcessorEditor::getCommandInfo(CommandID commandID, ApplicationCommandInfo& result)
-{
-    switch (commandID)
-    {
-    case CommandIDs::freshStart:
-        result.setInfo("Start Fresh", "Mode designed for basic Pulsar operation.", "Menu", 0);
-        result.setTicked(false);
-        // result.addDefaultKeypress('w', ModifierKeys::shiftModifier);
-        break;
-    case CommandIDs::loadPreset:
-        result.setInfo("Signature Presets", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-        result.setTicked(false);
-        //result.addDefaultKeypress('g', ModifierKeys::shiftModifier);
-        break;
-    case CommandIDs::loadUserPreset:
-        result.setInfo("User Preset", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-        result.setTicked(false);
-        //result.addDefaultKeypress('g', ModifierKeys::shiftModifier);
-        break;
-    case CommandIDs::explainPulsarSynthesis:
-        result.setInfo("Pulsar Synthesis Overview", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-        result.setTicked(false);
-        //result.addDefaultKeypress('g', ModifierKeys::shiftModifier);
-        break;
-    case CommandIDs::parametersExplained:
-        result.setInfo("Parameter Dictionary", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-        result.setTicked(false);
-        //result.addDefaultKeypress('g', ModifierKeys::shiftModifier);
-        break;
-    //case CommandIDs::testBasicOperation:
-    //    result.setInfo("Test your abilities", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-    //    result.setTicked(false);
-    //    //result.addDefaultKeypress('g', ModifierKeys::shiftModifier);
-    //    break;
-    //case CommandIDs::loadAboutPage:
-    //    result.setInfo("About Page", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-    //    result.setTicked(false);
-    //    //result.addDefaultKeypress('g', ModifierKeys::shiftModifier);
-    //    break;
-    //case CommandIDs::loadFoundersAppreciation:
-    //    result.setInfo("Founders Appreciation", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-    //    result.setTicked(false);
-    //    //result.addDefaultKeypress('g', ModifierKeys::shiftModifier);
-    //    break;
-
-    default:
-        break;
-    }
-}
-
-bool PulsarAudioProcessorEditor::perform(const InvocationInfo& info)
-{
-    switch (info.commandID)
-    {
-    case CommandIDs::freshStart:
-        commandRunner->setVisible(false);
-        audioProcessor.loadPreset(String("C:/ProgramData/Recluse-Audio/Pulsar/Presets/Default"));
-        break;
-    case CommandIDs::loadPreset:
-        commandRunner->setVisible(true); 
-        sidePanel.showOrHide(false);
-        commandRunner->startPresetMenu();
-        break;
-    case CommandIDs::loadUserPreset:
-        commandRunner->setVisible(true);
-        sidePanel.showOrHide(false);
-        commandRunner->startUserPresetMenu();
-        break;
-    case CommandIDs::explainPulsarSynthesis:
-        commandRunner->setVisible(true);
-        sidePanel.showOrHide(false);
-        commandRunner->startTutorial();
-        break;
-    case CommandIDs::parametersExplained:
-        commandRunner->setVisible(true);
-        sidePanel.showOrHide(false);
-        commandRunner->startParameterDemo();
-        break;
-    //case CommandIDs::testBasicOperation:
-    //    DBG("operation");
-    //    break;
-    //case CommandIDs::loadAboutPage:
-    //    DBG("about");
-    //    break;
-    //case CommandIDs::loadFoundersAppreciation:
-    //    DBG("founders");
-    //    break;
-    default:
-        return false;
-    }
-
-    return true;
-}
-
-/*
-  This is a deviation from the juce example in which this is set 
-  by a selection made by the user, and then called from perform()
-*/
-void PulsarAudioProcessorEditor::setBurgerMenuPosition()
-{
-    burgerMenu.setModel(this);
-    menuHeader.setVisible(true);
-    burgerMenu.setSize(sidePanel.getWidth(), sidePanel.getHeight());
-    sidePanel.setContent(&burgerMenu, false);
-    sidePanel.setColour(juce::SidePanel::backgroundColour, juce::Colours::black);
-    menuItemsChanged();
-    resized();
-}
+// void PulsarAudioProcessorEditor::setBurgerMenuPosition()
+// {
+//     burgerMenu.setModel(this);
+//     menuHeader.setVisible(true);
+//     burgerMenu.setSize(sidePanel.getWidth(), sidePanel.getHeight());
+//     sidePanel.setContent(&burgerMenu, false);
+//     sidePanel.setColour(juce::SidePanel::backgroundColour, juce::Colours::black);
+//     menuItemsChanged();
+//     resized();
+// }
 

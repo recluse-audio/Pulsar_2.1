@@ -14,16 +14,16 @@
 #include "../LookNFeel/NameFeel.h"
 #include "../LookNFeel/MixFeel.h"
 #include "../LookNFeel/PulsarUIFeel.h"
-#include "BurgerMenuHeader.h"
-#include "CommandRunnerComponent.h"
+// #include "BurgerMenuHeader.h"
+// #include "CommandRunnerComponent.h"
 #include "PulsarControlsComponent.h"
 #include "PulsarSlider.h"
 
 //==============================================================================
 /**
 */
-class PulsarAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer, public juce::ApplicationCommandTarget,
- public juce::MenuBarModel
+class PulsarAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer /*, public juce::ApplicationCommandTarget,
+ public juce::MenuBarModel*/
 {
 public:
     PulsarAudioProcessorEditor (PulsarAudioProcessor&);
@@ -41,28 +41,28 @@ public:
     void setTestColor(juce::Colour c){ color = c; }
 
     /* Menu Bar Model Virtuals*/
-    StringArray getMenuBarNames() override { return { "PRESETS", "TUTORIALS" }; }
-    PopupMenu getMenuForIndex(int menuIndex, const String& /*menuName*/) override;
-    void menuItemSelected(int /*menuItemID*/, int /*topLevelMenuIndex*/) override {}
+    // StringArray getMenuBarNames() override { return {}; }
+    // PopupMenu getMenuForIndex(int menuIndex, const String& /*menuName*/) override;
+    // void menuItemSelected(int /*menuItemID*/, int /*topLevelMenuIndex*/) override {}
 
     /*Application Command Target Virtuals*/
-    ApplicationCommandTarget* getNextCommandTarget() override;
-    void getAllCommands(Array<CommandID>& commands) override;
-    void getCommandInfo(CommandID commandID, ApplicationCommandInfo& result) override;
-    bool perform(const InvocationInfo& info) override;
-    void setBurgerMenuPosition();
+    // ApplicationCommandTarget* getNextCommandTarget() override;
+    // void getAllCommands(Array<CommandID>& commands) override;
+    // void getCommandInfo(CommandID commandID, ApplicationCommandInfo& result) override;
+    // bool perform(const InvocationInfo& info) override;
+    // void setBurgerMenuPosition();
 
-    enum CommandIDs
-    {
-        freshStart = 1,
-        loadPreset,
-        loadUserPreset,
-        explainPulsarSynthesis,
-        parametersExplained,
-        testBasicOperation,
-        loadAboutPage,
-        loadFoundersAppreciation
-    };
+    // enum CommandIDs
+    // {
+    //     freshStart = 1,
+    //     loadPreset,
+    //     loadUserPreset,
+    //     explainPulsarSynthesis,
+    //     parametersExplained,
+    //     testBasicOperation,
+    //     loadAboutPage,
+    //     loadFoundersAppreciation
+    // };
 
 private:
     PulsarUIFeel pulsarFeel;
@@ -77,18 +77,17 @@ private:
 
     std::unique_ptr<PulsarControlsComponent> controlComponent;
 
-    ApplicationCommandManager commandManager;
-    std::unique_ptr<TextButton> closeButton;
-    std::unique_ptr <CommandRunnerComponent>   commandRunner;
-    //CommandRunnerComponent commandRunner;
+    // ApplicationCommandManager commandManager;
+    // std::unique_ptr<TextButton> closeButton;
+    // std::unique_ptr <CommandRunnerComponent>   commandRunner;
 
-    std::unique_ptr<MenuBarComponent> menuBar;
+    // std::unique_ptr<MenuBarComponent> menuBar;
 
-    SidePanel sidePanel{ "", 300, false };
+    // SidePanel sidePanel{ "", 300, false };
 
-    BurgerMenuComponent burgerMenu;
+    // BurgerMenuComponent burgerMenu;
 
-    BurgerMenuHeader menuHeader{ sidePanel };
+    // BurgerMenuHeader menuHeader{ sidePanel };
 
 
     PulsaretVisualizer  pulsaretVisualizer;

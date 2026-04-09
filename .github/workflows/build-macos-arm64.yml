@@ -46,6 +46,11 @@ jobs:
           cmake --build BUILD --target Pulsar_Standalone \
             --config ${{ github.event.inputs.config || 'Release' }}
 
+      - name: Build All
+        run: |
+          cmake --build BUILD --target Pulsar_All \
+            --config ${{ github.event.inputs.config || 'Release' }}
+
       - name: Upload VST3
         uses: actions/upload-artifact@v4
         with:
