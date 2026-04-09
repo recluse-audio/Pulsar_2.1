@@ -21,6 +21,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE integration
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Find Python (uses python3 on macOS/Linux, python on Windows)
+find_package(Python3 REQUIRED)
+
 # JUCE setup
 add_subdirectory(SUBMODULES/JUCE)
 
@@ -29,7 +32,7 @@ set(FORMATS VST3 Standalone)
 
 # Create version header before building
 add_custom_target(update_version_header
-    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/HELPER_SCRIPTS/update_version.py"
+    COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/HELPER_SCRIPTS/update_version.py"
             "${CMAKE_CURRENT_SOURCE_DIR}/VERSION.txt"
             "${CMAKE_CURRENT_SOURCE_DIR}/SOURCE/Util/Version.h"
     BYPRODUCTS "${CMAKE_CURRENT_SOURCE_DIR}/SOURCE/Util/Version.h"
