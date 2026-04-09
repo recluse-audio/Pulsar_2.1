@@ -1,6 +1,28 @@
 from __future__ import annotations
+import shutil
 import sys
 from pathlib import Path
+
+
+def find_cmake() -> str:
+    """Return the cmake executable path, checking common install locations on macOS."""
+    if found := shutil.which("cmake"):
+        return found
+
+    if sys.platform == "darwin":
+        candidates = [
+            "/opt/homebrew/bin/cmake",           # Homebrew (Apple Silicon)
+            "/usr/local/bin/cmake",              # Homebrew (Intel)
+            "/Applications/CMake.app/Contents/bin/cmake",
+        ]
+        for path in candidates:
+            if Path(path).exists():
+                return path
+
+    raise FileNotFoundError(
+        "cmake not found. Install it via 'brew install cmake' or https://cmake.org/download/"
+    )
+
 
 def beep(*, success: bool = True) -> None:
     """Play an audible notification. Best-effort cross-platform."""

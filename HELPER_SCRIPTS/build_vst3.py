@@ -5,17 +5,23 @@ Cross-platform CMake build script (macOS / Windows / Linux).
 Equivalent to:
   pushd BUILD
   cmake ..
-  cmake --build . --target Pulsar_VST3
+  cmake --build . --target Pulsar_VST3 [--config Debug|Release]
   popd
+
+Usage:
+  python build_vst3.py
+  python build_vst3.py --config Release
 """
 
 from __future__ import annotations
 
+import argparse
 import subprocess
 import sys
 from pathlib import Path
 
-# Plugin name must match the CMake target defined in CMakeLists.txt
+from build_complete import find_cmake
+
 PLUGIN_NAME = "Pulsar"
 
 
@@ -25,7 +31,6 @@ def run(cmd: list[str], cwd: Path) -> None:
 
 
 def regenerate_cmake_lists() -> None:
-    """Regenerate CMAKE/SOURCES.cmake and CMAKE/TESTS.cmake from directory scan."""
     regen_script = Path(__file__).parent / "regenSource.py"
     if regen_script.exists():
         print("Regenerating CMake file lists...")
@@ -35,22 +40,22 @@ def regenerate_cmake_lists() -> None:
 
 
 def main() -> int:
-    # Regenerate CMake file lists before building
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--config", default="Debug", help="Build config: Debug or Release (default: Debug)")
+    args = ap.parse_args()
+
     regenerate_cmake_lists()
 
     build_dir = Path("BUILD").resolve()
     if not build_dir.exists():
         raise FileNotFoundError("BUILD directory does not exist")
 
-    # Configure
-    run(["cmake", ".."], cwd=build_dir)
+    cmake = find_cmake()
+    run([cmake, ".."], cwd=build_dir)
 
-    # Build target
-    build_cmd = ["cmake", "--build", ".", "--target", f"{PLUGIN_NAME}_VST3"]
-
-    # Visual Studio / multi-config handling
+    build_cmd = [cmake, "--build", ".", "--target", f"{PLUGIN_NAME}_VST3"]
     if sys.platform.startswith("win"):
-        build_cmd += ["--config", "Debug"]
+        build_cmd += ["--config", args.config]
 
     run(build_cmd, cwd=build_dir)
     return 0
