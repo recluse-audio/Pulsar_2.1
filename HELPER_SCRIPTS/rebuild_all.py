@@ -23,29 +23,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+from build_complete import find_cmake
+
 # Plugin name must match the CMake target defined in CMakeLists.txt
 PLUGIN_NAME = "Pulsar"
-
-# Prefer an explicitly installed CMake if PATH resolution is unreliable.
-DEFAULT_CMAKE_CANDIDATES = [
-    "/opt/cmake/CMake.app/Contents/bin/cmake",
-    "/Applications/CMake.app/Contents/bin/cmake",
-]
-
-
-def find_cmake() -> str:
-    cmake = shutil.which("cmake")
-    if cmake:
-        return cmake
-
-    for candidate in DEFAULT_CMAKE_CANDIDATES:
-        if Path(candidate).exists():
-            return candidate
-
-    raise FileNotFoundError(
-        "Could not find 'cmake'. Checked PATH and common macOS install locations:\n"
-        + "\n".join(DEFAULT_CMAKE_CANDIDATES)
-    )
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> None:
