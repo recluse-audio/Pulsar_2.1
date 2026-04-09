@@ -26,6 +26,27 @@ from pathlib import Path
 # Plugin name must match the CMake target defined in CMakeLists.txt
 PLUGIN_NAME = "Pulsar"
 
+# Prefer an explicitly installed CMake if PATH resolution is unreliable.
+DEFAULT_CMAKE_CANDIDATES = [
+    "/opt/cmake/CMake.app/Contents/bin/cmake",
+    "/Applications/CMake.app/Contents/bin/cmake",
+]
+
+
+def find_cmake() -> str:
+    cmake = shutil.which("cmake")
+    if cmake:
+        return cmake
+
+    for candidate in DEFAULT_CMAKE_CANDIDATES:
+        if Path(candidate).exists():
+            return candidate
+
+    raise FileNotFoundError(
+        "Could not find 'cmake'. Checked PATH and common macOS install locations:\n"
+        + "\n".join(DEFAULT_CMAKE_CANDIDATES)
+    )
+
 
 def run(cmd: list[str], cwd: Path | None = None) -> None:
     print("+", " ".join(cmd))
@@ -64,6 +85,9 @@ def main() -> int:
 
     src_dir = Path(args.source_dir).resolve()
     bld_dir = Path(args.build_dir).resolve()
+    cmake = find_cmake()
+
+    print(f"Using cmake: {cmake}")
 
     # Regenerate CMake file lists before building
     regenerate_cmake_lists()
@@ -74,14 +98,14 @@ def main() -> int:
     bld_dir.mkdir(parents=True, exist_ok=True)
 
     # Configure
-    cfg_cmd = ["cmake", "-S", str(src_dir), "-B", str(bld_dir)]
+    cfg_cmd = [cmake, "-S", str(src_dir), "-B", str(bld_dir)]
     if args.generator:
         cfg_cmd += ["-G", args.generator]
     cfg_cmd += unknown  # allow passing extra -DVAR=VALUE etc.
     run(cfg_cmd)
 
     # Build
-    build_cmd = ["cmake", "--build", str(bld_dir), "--target", args.target]
+    build_cmd = [cmake, "--build", str(bld_dir), "--target", args.target]
 
     # On Windows with Visual Studio (multi-config), you usually must pass --config.
     gen = args.generator
