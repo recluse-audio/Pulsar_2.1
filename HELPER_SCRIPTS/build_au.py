@@ -88,7 +88,7 @@ def main() -> int:
     build_cmd = [
         cmake,
         "--build", str(build),
-        "--target", f"{PLUGIN_NAME}_VST3",
+        "--target", f"{PLUGIN_NAME}_AU",
     ]
 
     if sys.platform.startswith("win"):
