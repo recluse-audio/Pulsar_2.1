@@ -50,6 +50,29 @@ python HELPER_SCRIPTS/rebuild_all.py --config Release
 CMAKE_BUILD_TYPE=Release python HELPER_SCRIPTS/rebuild_all.py
 ```
 
+## Creating a Windows Installer
+
+The `INSTALLERS/` directory contains an [Inno Setup](https://jrsoftware.org/isinfo.php) script for building a Windows installer.
+
+### Prerequisites
+- [Inno Setup 6](https://jrsoftware.org/isdl.php) installed (default path: `C:\Program Files (x86)\Inno Setup 6\`)
+
+### Steps
+
+1. Build the plugin in Release mode:
+```bash
+cmake --build BUILD --target Pulsar_VST3 --config Release
+```
+
+2. Update the version number in `INSTALLERS/Pulsar.iss` to match `VERSION.txt`.
+
+3. Compile the installer:
+```bash
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" INSTALLERS\Pulsar.iss
+```
+
+The installer exe is written to `C:\STORAGE\INSTALLERS\` and installs `Pulsar.vst3` into `C:\Program Files\Common Files\VST3\`.
+
 ## Project Structure
 
 ```
@@ -64,6 +87,7 @@ Pulsar_2.1/
 │   └── Util/            # Version header
 ├── CMAKE/               # CMake configuration files
 ├── HELPER_SCRIPTS/      # Build scripts
+├── INSTALLERS/          # Inno Setup installer script
 ├── TESTS/               # Unit tests (Catch2)
 ├── SUBMODULES/          # Git submodules (JUCE)
 ├── BUILD/               # Build artifacts (not tracked)
