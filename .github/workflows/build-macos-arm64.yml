@@ -28,7 +28,7 @@ jobs:
       - name: Configure
         run: |
           cmake -S . -B BUILD \
-            -DCMAKE_BUILD_TYPE=${{ github.event.inputs.config || 'Release' }} \
+            -G Xcode \
             -DCMAKE_OSX_ARCHITECTURES=arm64
 
       - name: Build VST3
