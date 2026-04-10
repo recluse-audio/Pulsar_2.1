@@ -41,14 +41,21 @@ jobs:
         run: |
           cmake --build BUILD --target Pulsar_All --config ${{ github.event.inputs.config || 'Release' }}
 
+      - name: Package bundles
+        shell: pwsh
+        run: |
+          $config = "${{ github.event.inputs.config || 'Release' }}"
+          Compress-Archive -Path "BUILD/Pulsar_artefacts/$config/VST3/Pulsar.vst3" -DestinationPath "Pulsar-Windows-VST3.zip"
+          Compress-Archive -Path "BUILD/Pulsar_artefacts/$config/Standalone/Pulsar.exe" -DestinationPath "Pulsar-Windows-Standalone.zip"
+
       - name: Upload VST3
         uses: actions/upload-artifact@v4
         with:
           name: Pulsar-Windows-VST3
-          path: BUILD/Pulsar_artefacts/${{ github.event.inputs.config || 'Release' }}/VST3/Pulsar.vst3
+          path: Pulsar-Windows-VST3.zip
 
       - name: Upload Standalone
         uses: actions/upload-artifact@v4
         with:
           name: Pulsar-Windows-Standalone
-          path: BUILD/Pulsar_artefacts/${{ github.event.inputs.config || 'Release' }}/Standalone/Pulsar.exe
+          path: Pulsar-Windows-Standalone.zip
