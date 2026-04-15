@@ -7,7 +7,10 @@
       "Bash(python HELPER_SCRIPTS/build_tests.py)",
       "Bash(python HELPER_SCRIPTS/build_vst3.py)",
       "Bash(./BUILD/Debug/Tests.exe \"[Parameters]\")",
-      "Bash(C:/Program Files \\(x86\\)/Inno Setup 6/ISCC.exe:*)"
+      "Bash(C:/Program Files \\(x86\\)/Inno Setup 6/ISCC.exe:*)",
+      "Bash(winget show *)",
+      "Read(//c/Program Files \\(x86\\)/Inno Setup 6/**)",
+      "Read(//c/Program Files/Inno Setup 6/**)"
     ]
   }
 }
