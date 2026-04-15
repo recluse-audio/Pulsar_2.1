@@ -1,5 +1,5 @@
 #define MyAppName "Pulsar"
-#define MyAppVersion "1.1.36"
+#define MyAppVersion "1.1.55"
 #define MyAppPublisher "recluse-audio"
 #define MyAppURL "https://recluse-audio.com"
 #define VST3Source SourcePath + "\..\..\BUILD\Pulsar_artefacts\Release\VST3\Pulsar.vst3"

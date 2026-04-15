@@ -103,6 +103,7 @@ private:
     
     NameFeel nameFeel;
     std::unique_ptr<Label>          nameLabel;
+    std::unique_ptr<Label>          versionLabel;
 
     PulsarAudioProcessor& audioProcessor;
 

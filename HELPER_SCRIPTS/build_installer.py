@@ -8,12 +8,12 @@ from pathlib import Path
 
 
 def main() -> int:
-    scripts_dir = Path(__file__).resolve().parent
+    installers_dir = Path(__file__).resolve().parents[1] / "INSTALLERS"
 
     if sys.platform == "darwin":
-        script = scripts_dir / "build_mac_installer.py"
+        script = installers_dir / "MAC" / "build_mac_installer.py"
     elif sys.platform.startswith("win"):
-        script = scripts_dir / "build_pc_installer.py"
+        script = installers_dir / "PC" / "build_pc_installer.py"
     else:
         print(f"Unsupported platform: {sys.platform}", file=sys.stderr)
         return 1

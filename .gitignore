@@ -44,6 +44,16 @@ Thumbs.db
 # Test output
 TESTS/OUTPUT/*
 
+# Signed build output
+SIGNED/PC/OUTPUT/
+SIGNED/MAC/OUTPUT/
+
+# Installer build output
+INSTALLERS/PC/BUILD/
+
+# Release packages
+RELEASE/
+
 # Legacy JUCE / Projucer build artifacts
 **/Builds
 **/JuceLibraryCode

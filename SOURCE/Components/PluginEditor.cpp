@@ -8,6 +8,7 @@
 
 #include "../Processor/PluginProcessor.h"
 #include "PluginEditor.h"
+#include "../Util/Version.h"
 
 //==============================================================================
 PulsarAudioProcessorEditor::PulsarAudioProcessorEditor (PulsarAudioProcessor& p)
@@ -62,7 +63,13 @@ void PulsarAudioProcessorEditor::init()
     nameLabel->setFont(Font("Consolas", "Regular", 20.f));
     nameLabel->setLookAndFeel(&nameFeel);
     nameLabel->setColour(juce::Label::textColourId, juce::Colours::white);
-    
+
+    versionLabel = std::make_unique<Label>("", "v" BUILD_VERSION_STRING);
+    addAndMakeVisible(versionLabel.get());
+    versionLabel->setBoundsRelative(0.4f, 0.08f, 0.3f, 0.05f);
+    versionLabel->setFont(Font("Consolas", "Regular", 10.f));
+    versionLabel->setColour(juce::Label::textColourId, juce::Colours::grey);
+
 }
 
 void PulsarAudioProcessorEditor::resetSliders()

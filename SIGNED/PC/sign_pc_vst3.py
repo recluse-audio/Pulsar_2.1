@@ -15,7 +15,8 @@ METADATA = Path.home() / ".azure" / "metadata.json"
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
-    source = root / "BUILD" / "Pulsar_artefacts" / "Release" / "VST3" / "Pulsar.vst3" / "Contents" / "x86_64-win" / "Pulsar.vst3"
+    bundle_dir = root / "BUILD" / "Pulsar_artefacts" / "Release" / "VST3" / "Pulsar.vst3"
+    source = bundle_dir / "Contents" / "x86_64-win" / "Pulsar.vst3"
 
     if not source.exists():
         print(f"ERROR: VST3 binary not found: {source}", file=sys.stderr)
@@ -23,10 +24,19 @@ def main() -> int:
 
     output_dir = Path(__file__).resolve().parent / "OUTPUT"
     output_dir.mkdir(parents=True, exist_ok=True)
-    target = output_dir / source.name
 
-    print(f"Copying: {source} -> {target}")
-    shutil.copy2(source, target)
+    # Copy the entire VST3 bundle directory so the installer can use it
+    target_bundle = output_dir / "Pulsar.vst3"
+    if target_bundle.exists():
+        if target_bundle.is_dir():
+            shutil.rmtree(target_bundle)
+        else:
+            target_bundle.unlink()
+    print(f"Copying bundle: {bundle_dir} -> {target_bundle}")
+    shutil.copytree(bundle_dir, target_bundle)
+
+    # The binary to sign is inside the bundle
+    target = target_bundle / "Contents" / "x86_64-win" / "Pulsar.vst3"
 
     cmd = [
         SIGNTOOL, "sign",
