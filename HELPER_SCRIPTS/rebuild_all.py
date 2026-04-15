@@ -52,8 +52,12 @@ def is_multi_config_generator(gen: str | None) -> bool:
 
 
 def get_targets() -> list[str]:
-    """Return the list of plugin format targets to build for the current platform."""
+    """Return the list of plugin format targets to build for the current platform.
+
+    Pulsar_SharedCode must be first — all format targets link against it.
+    """
     targets = [
+        f"{PLUGIN_NAME}",          # shared code lib — must build first
         f"{PLUGIN_NAME}_Standalone",
         f"{PLUGIN_NAME}_VST3",
     ]

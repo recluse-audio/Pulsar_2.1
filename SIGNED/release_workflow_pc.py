@@ -21,6 +21,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+from plugin_info import get_plugin_info
+
+ROOT = Path(__file__).resolve().parents[1]
+INFO = get_plugin_info(ROOT)
+
 
 def read_version(version_file: Path) -> str:
     """Read the release version string from VERSION.txt."""
@@ -52,30 +57,32 @@ def run_step(description: str, cmd: list[str]) -> int:
 
 def find_signed_installer(signed_output: Path) -> Path | None:
     """Find the signed installer executable in the signed output directory."""
-    matches = sorted(signed_output.glob("Pulsar_v*_Windows_Installer.exe"))
+    matches = sorted(signed_output.glob(f"{INFO['product_name']}_v*_Windows_Installer.exe"))
     return matches[-1] if matches else None
 
 
 def main() -> int:
     python = sys.executable
-    root = Path(__file__).resolve().parents[1]
+    name = INFO['product_name']
+    target = INFO['target']
 
     # Paths
-    version_file = root / "VERSION.txt"
-    vst3_build = root / "BUILD" / "Pulsar_artefacts" / "Release" / "VST3" / "Pulsar.vst3"
-    vst3_inner = vst3_build / "Contents" / "x86_64-win" / "Pulsar.vst3"
-    standalone_build = root / "BUILD" / "Pulsar_artefacts" / "Release" / "Standalone" / "Pulsar.exe"
-    iss_file = root / "INSTALLERS" / "PC" / "Pulsar.iss"
-    check_script = root / "SIGNED" / "PC" / "check_if_signed_pc.py"
-    sign_builds_script = root / "HELPER_SCRIPTS" / "sign_builds.py"
-    build_installer_script = root / "INSTALLERS" / "PC" / "build_pc_installer.py"
-    sign_installers_script = root / "HELPER_SCRIPTS" / "sign_installers.py"
-    signed_output = root / "SIGNED" / "PC" / "OUTPUT"
+    version_file = ROOT / "VERSION.txt"
+    vst3_build = ROOT / "BUILD" / f"{target}_artefacts" / "Release" / "VST3" / f"{name}.vst3"
+    vst3_inner = vst3_build / "Contents" / "x86_64-win" / f"{name}.vst3"
+    standalone_build = ROOT / "BUILD" / f"{target}_artefacts" / "Release" / "Standalone" / f"{name}.exe"
+    iss_file = ROOT / "INSTALLERS" / "PC" / f"{name}.iss"
+    check_script = ROOT / "SIGNED" / "PC" / "check_if_signed_pc.py"
+    sign_builds_script = ROOT / "HELPER_SCRIPTS" / "sign_builds.py"
+    build_installer_script = ROOT / "INSTALLERS" / "PC" / "build_pc_installer.py"
+    sign_installers_script = ROOT / "HELPER_SCRIPTS" / "sign_installers.py"
+    signed_output = ROOT / "SIGNED" / "PC" / "OUTPUT"
 
     # Read version
     version = read_version(version_file)
-    release_dir = root / "RELEASE" / "PC" / version
+    release_dir = ROOT / "RELEASE" / "PC" / version
 
+    print(f"Plugin: {name} (target: {target})")
     print(f"Release version: {version}")
     print(f"Release directory: {release_dir}")
 
@@ -113,9 +120,9 @@ def main() -> int:
 
     # ── Step 5: Verify builds ARE now signed ──────────────────────
     print(f"\n[Step 5] Verifying signed builds...")
-    signed_vst3_bundle = signed_output / "Pulsar.vst3"
-    signed_vst3 = signed_vst3_bundle / "Contents" / "x86_64-win" / "Pulsar.vst3"
-    signed_exe = signed_output / "Pulsar.exe"
+    signed_vst3_bundle = signed_output / f"{name}.vst3"
+    signed_vst3 = signed_vst3_bundle / "Contents" / "x86_64-win" / f"{name}.vst3"
+    signed_exe = signed_output / f"{name}.exe"
     for f in [signed_vst3, signed_exe]:
         if not f.exists():
             print(f"ERROR: Signed file not found: {f}")
@@ -127,7 +134,7 @@ def main() -> int:
     print("OK: All builds verified as signed.")
 
     # ── Step 6: Update .iss version and build installer ───────────
-    print(f"\n[Step 6] Updating Pulsar.iss version to {version}...")
+    print(f"\n[Step 6] Updating {iss_file.name} version to {version}...")
     update_iss_version(iss_file, version)
 
     rc = run_step("Build installer", [python, str(build_installer_script)])
@@ -160,12 +167,10 @@ def main() -> int:
     print(f"\n[Step 9] Copying signed assets to {release_dir}...")
     release_dir.mkdir(parents=True, exist_ok=True)
 
-    # Copy VST3 bundle (directory)
-    dst_vst3 = release_dir / "Pulsar.vst3"
-    print(f"  Pulsar.vst3/ -> {dst_vst3}")
+    dst_vst3 = release_dir / f"{name}.vst3"
+    print(f"  {name}.vst3/ -> {dst_vst3}")
     shutil.copytree(signed_vst3_bundle, dst_vst3)
 
-    # Copy standalone and installer (files)
     for src in [signed_exe, signed_installer]:
         dst = release_dir / src.name
         print(f"  {src.name} -> {dst}")

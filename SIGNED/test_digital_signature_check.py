@@ -11,6 +11,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+from plugin_info import get_plugin_info
+
+ROOT = Path(__file__).resolve().parents[1]
+INFO = get_plugin_info(ROOT)
+
 
 def run_check(script: Path, binary: Path) -> int:
     """Run the check script on a binary and return its exit code."""
@@ -21,24 +26,28 @@ def run_check(script: Path, binary: Path) -> int:
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[1]
+    name = INFO['product_name']
+    target = INFO['target']
     passed = 0
     failed = 0
     skipped = 0
 
     if sys.platform.startswith("win"):
         check_script = Path(__file__).resolve().parent / "PC" / "check_if_signed_pc.py"
-        signed_binary = Path(__file__).resolve().parent / "PC" / "OUTPUT" / "Pulsar.vst3"
+        signed_binary = (
+            Path(__file__).resolve().parent / "PC" / "OUTPUT"
+            / f"{name}.vst3" / "Contents" / "x86_64-win" / f"{name}.vst3"
+        )
         unsigned_binary = (
-            root / "BUILD" / "Pulsar_artefacts" / "Release" / "VST3"
-            / "Pulsar.vst3" / "Contents" / "x86_64-win" / "Pulsar.vst3"
+            ROOT / "BUILD" / f"{target}_artefacts" / "Release" / "VST3"
+            / f"{name}.vst3" / "Contents" / "x86_64-win" / f"{name}.vst3"
         )
     elif sys.platform == "darwin":
         check_script = Path(__file__).resolve().parent / "MAC" / "check_if_signed_mac.py"
-        signed_binary = Path(__file__).resolve().parent / "MAC" / "OUTPUT" / "Pulsar.vst3"
+        signed_binary = Path(__file__).resolve().parent / "MAC" / "OUTPUT" / f"{name}.vst3"
         unsigned_binary = (
-            root / "BUILD" / "Pulsar_artefacts" / "Release" / "VST3"
-            / "Pulsar.vst3" / "Contents" / "MacOS" / "Pulsar"
+            ROOT / "BUILD" / f"{target}_artefacts" / "Release" / "VST3"
+            / f"{name}.vst3" / "Contents" / "MacOS" / name
         )
     else:
         print(f"Unsupported platform: {sys.platform}")

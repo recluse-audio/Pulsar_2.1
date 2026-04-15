@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sign the Pulsar Standalone executable with Azure Code Signing."""
+"""Sign the Standalone executable with Azure Code Signing."""
 
 from __future__ import annotations
 
@@ -8,14 +8,18 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from plugin_info import get_plugin_info
+
+ROOT = Path(__file__).resolve().parents[2]
+INFO = get_plugin_info(ROOT)
 SIGNTOOL = "signtool.exe"
 DLIB = Path.home() / "AppData" / "Local" / "Microsoft" / "MicrosoftArtifactSigningClientTools" / "Azure.CodeSigning.Dlib.dll"
 METADATA = Path.home() / ".azure" / "metadata.json"
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
-    source = root / "BUILD" / "Pulsar_artefacts" / "Release" / "Standalone" / "Pulsar.exe"
+    source = ROOT / "BUILD" / f"{INFO['target']}_artefacts" / "Release" / "Standalone" / f"{INFO['product_name']}.exe"
 
     if not source.exists():
         print(f"ERROR: Standalone executable not found: {source}", file=sys.stderr)

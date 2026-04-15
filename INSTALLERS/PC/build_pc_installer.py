@@ -6,6 +6,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "SIGNED"))
+from plugin_info import get_plugin_info
+
+ROOT = Path(__file__).resolve().parents[2]
+INFO = get_plugin_info(ROOT)
 
 ISCC_CANDIDATES = [
     r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
@@ -24,16 +29,16 @@ def find_iscc() -> str:
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
-    iss_source = Path(__file__).resolve().parent / "Pulsar.iss"
-    signed_output = root / "SIGNED" / "PC" / "OUTPUT"
+    name = INFO['product_name']
+    target = INFO['target']
+    signed_output = ROOT / "SIGNED" / "PC" / "OUTPUT"
+    iss_source = Path(__file__).resolve().parent / f"{name}.iss"
 
     if not iss_source.exists():
         print(f"ISS project file not found: {iss_source}", file=sys.stderr)
         return 1
 
-    # Verify signed binaries exist
-    signed_vst3 = signed_output / "Pulsar.vst3"
+    signed_vst3 = signed_output / f"{name}.vst3"
     if not signed_vst3.exists():
         print(f"ERROR: Signed VST3 not found: {signed_vst3}", file=sys.stderr)
         print("Run sign_builds.py first to sign the plugin binaries.", file=sys.stderr)
@@ -41,12 +46,12 @@ def main() -> int:
 
     # Create a modified .iss that sources from signed output
     iss_text = iss_source.read_text()
-    iss_text = iss_text.replace(
-        r'#define VST3Source SourcePath + "\..\..\BUILD\Pulsar_artefacts\Release\VST3\Pulsar.vst3"',
-        f'#define VST3Source "{signed_output}\\Pulsar.vst3"',
-    )
+    # Replace the VST3Source define to point at signed output
+    original_vst3_source = f'#define VST3Source SourcePath + "\\..\\..\\BUILD\\{target}_artefacts\\Release\\VST3\\{name}.vst3"'
+    new_vst3_source = f'#define VST3Source "{signed_output}\\{name}.vst3"'
+    iss_text = iss_text.replace(original_vst3_source, new_vst3_source)
 
-    tmp_iss = Path(__file__).resolve().parent / "Pulsar_signed.iss"
+    tmp_iss = Path(__file__).resolve().parent / f"{name}_signed.iss"
     tmp_iss.write_text(iss_text)
 
     iscc = find_iscc()

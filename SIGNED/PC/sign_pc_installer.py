@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sign the Pulsar Windows installer with Azure Code Signing."""
+"""Sign the Windows installer with Azure Code Signing."""
 
 from __future__ import annotations
 
@@ -8,6 +8,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from plugin_info import get_plugin_info
+
+ROOT = Path(__file__).resolve().parents[2]
+INFO = get_plugin_info(ROOT)
 SIGNTOOL = "signtool.exe"
 DLIB = Path.home() / "AppData" / "Local" / "Microsoft" / "MicrosoftArtifactSigningClientTools" / "Azure.CodeSigning.Dlib.dll"
 METADATA = Path.home() / ".azure" / "metadata.json"
@@ -15,16 +20,14 @@ METADATA = Path.home() / ".azure" / "metadata.json"
 
 def find_installer(build_dir: Path) -> Path | None:
     """Find the installer exe in the build output directory."""
-    candidates = list(build_dir.glob("Pulsar_v*_Windows_Installer.exe"))
+    candidates = list(build_dir.glob(f"{INFO['product_name']}_v*_Windows_Installer.exe"))
     if not candidates:
         return None
-    # Return the most recently modified if multiple exist
     return max(candidates, key=lambda p: p.stat().st_mtime)
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
-    build_dir = root / "INSTALLERS" / "PC" / "BUILD"
+    build_dir = ROOT / "INSTALLERS" / "PC" / "BUILD"
 
     if not build_dir.exists():
         print(f"ERROR: Installer build directory not found: {build_dir}", file=sys.stderr)

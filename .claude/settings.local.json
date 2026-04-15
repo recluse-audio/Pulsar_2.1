@@ -13,7 +13,11 @@
       "Read(//c/Program Files/Inno Setup 6/**)",
       "Bash(mv \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/PC/check_if_signed.py\" \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/PC/check_if_signed_pc.py\")",
       "Bash(mv \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/MAC/check_if_signed.py\" \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/MAC/check_if_signed_mac.py\")",
-      "Bash(ls *)"
+      "Bash(ls *)",
+      "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/sign_builds.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/sign_builds.py)",
+      "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/sign_installers.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/sign_installers.py)",
+      "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/release_workflow.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/release_workflow.py)",
+      "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/build_installer.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/build_installer.py)"
     ]
   }
 }

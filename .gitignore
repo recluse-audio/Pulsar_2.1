@@ -56,4 +56,8 @@ RELEASE/
 
 # Legacy JUCE / Projucer build artifacts
 **/Builds
+
+# Python cache
+__pycache__/
+*.pyc
 **/JuceLibraryCode

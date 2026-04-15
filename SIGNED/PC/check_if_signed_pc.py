@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify that signed Pulsar binaries carry the expected digital signature."""
+"""Verify that signed plugin binaries carry the expected digital signature."""
 
 from __future__ import annotations
 
