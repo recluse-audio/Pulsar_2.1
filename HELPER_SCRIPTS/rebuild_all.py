@@ -2,16 +2,15 @@
 """
 Cross-platform CMake build script (macOS / Windows / Linux).
 
-Equivalent to:
-  rm -rf BUILD
-  mkdir BUILD
-  cmake ..
-  cmake --build . --target <PluginName>
+Builds ALL available plugin formats for the current platform:
+  - Standalone (all platforms)
+  - VST3       (all platforms)
+  - AU         (macOS only)
 
 Usage examples:
-  python build.py
-  python build.py --target Pulsar --config Release
-  python build.py --build-dir BUILD --generator "Ninja" --clean
+  python rebuild_all.py
+  python rebuild_all.py --config Release
+  python rebuild_all.py --build-dir BUILD --generator "Ninja" --clean
 """
 
 from __future__ import annotations
@@ -52,11 +51,21 @@ def is_multi_config_generator(gen: str | None) -> bool:
     return ("visual studio" in g) or ("xcode" in g) or ("multi-config" in g)
 
 
+def get_targets() -> list[str]:
+    """Return the list of plugin format targets to build for the current platform."""
+    targets = [
+        f"{PLUGIN_NAME}_Standalone",
+        f"{PLUGIN_NAME}_VST3",
+    ]
+    if sys.platform == "darwin":
+        targets.append(f"{PLUGIN_NAME}_AU")
+    return targets
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--source-dir", default=".", help="CMake source dir (default: .)")
     ap.add_argument("--build-dir", default="BUILD", help="Build dir (default: BUILD)")
-    ap.add_argument("--target", default=PLUGIN_NAME, help=f"Build target (default: {PLUGIN_NAME})")
     ap.add_argument("--config", default=None, help="Build config (Debug/Release/etc). Needed for VS/Xcode.")
     ap.add_argument("--clean", action="store_true", help="Delete build dir before configuring.")
     ap.add_argument("--generator", default=None, help='CMake generator, e.g. "Ninja", "Unix Makefiles", "Visual Studio 17 2022".')
@@ -78,35 +87,43 @@ def main() -> int:
 
     bld_dir.mkdir(parents=True, exist_ok=True)
 
-    # Configure
+    # Configure (once)
     cfg_cmd = [cmake, "-S", str(src_dir), "-B", str(bld_dir)]
     if args.generator:
         cfg_cmd += ["-G", args.generator]
-    cfg_cmd += unknown  # allow passing extra -DVAR=VALUE etc.
-    run(cfg_cmd)
 
-    # Build
-    build_cmd = [cmake, "--build", str(bld_dir), "--target", args.target]
-
-    # On Windows with Visual Studio (multi-config), you usually must pass --config.
     gen = args.generator
     multi = is_multi_config_generator(gen)
 
-    if sys.platform.startswith("win"):
-        if args.config is None:
-            args.config = "Debug"
-        build_cmd += ["--config", args.config]
-    else:
-        if args.config is not None or multi:
+    # For single-config generators, set CMAKE_BUILD_TYPE at configure time
+    if not multi and not sys.platform.startswith("win"):
+        config = args.config or "Release"
+        cfg_cmd += [f"-DCMAKE_BUILD_TYPE={config}"]
+
+    cfg_cmd += unknown  # allow passing extra -DVAR=VALUE etc.
+    run(cfg_cmd)
+
+    # Build each target
+    targets = get_targets()
+    print(f"\nBuilding targets: {', '.join(targets)}\n")
+
+    for target in targets:
+        build_cmd = [cmake, "--build", str(bld_dir), "--target", target]
+
+        if sys.platform.startswith("win"):
             build_cmd += ["--config", args.config or "Debug"]
+        elif multi:
+            build_cmd += ["--config", args.config or "Release"]
 
-    if args.parallel and args.parallel > 0:
-        build_cmd += ["-j", str(args.parallel)]
+        if args.parallel and args.parallel > 0:
+            build_cmd += ["-j", str(args.parallel)]
 
-    if args.verbose:
-        build_cmd += ["--verbose"]
+        if args.verbose:
+            build_cmd += ["--verbose"]
 
-    run(build_cmd)
+        run(build_cmd)
+
+    print(f"\nAll targets built successfully.")
     return 0
 
 

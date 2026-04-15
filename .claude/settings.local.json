@@ -10,7 +10,10 @@
       "Bash(C:/Program Files \\(x86\\)/Inno Setup 6/ISCC.exe:*)",
       "Bash(winget show *)",
       "Read(//c/Program Files \\(x86\\)/Inno Setup 6/**)",
-      "Read(//c/Program Files/Inno Setup 6/**)"
+      "Read(//c/Program Files/Inno Setup 6/**)",
+      "Bash(mv \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/PC/check_if_signed.py\" \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/PC/check_if_signed_pc.py\")",
+      "Bash(mv \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/MAC/check_if_signed.py\" \"C:/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/SIGNED/MAC/check_if_signed_mac.py\")",
+      "Bash(ls *)"
     ]
   }
 }
