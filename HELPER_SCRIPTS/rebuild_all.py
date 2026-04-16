@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -31,6 +32,18 @@ PLUGIN_NAME = "Pulsar"
 def run(cmd: list[str], cwd: Path | None = None) -> None:
     print("+", " ".join(cmd))
     subprocess.run(cmd, cwd=str(cwd) if cwd else None, check=True)
+
+
+def rmtree(path: Path) -> None:
+    """Delete a directory tree, clearing read-only bits first (required on Windows for git objects)."""
+    def _clear_readonly(func, fpath, _exc):
+        os.chmod(fpath, stat.S_IWRITE)
+        func(fpath)
+
+    if sys.version_info >= (3, 12):
+        shutil.rmtree(path, onexc=_clear_readonly)
+    else:
+        shutil.rmtree(path, onerror=_clear_readonly)
 
 
 def regenerate_cmake_lists() -> None:
@@ -87,7 +100,7 @@ def main() -> int:
     regenerate_cmake_lists()
 
     if args.clean and bld_dir.exists():
-        shutil.rmtree(bld_dir)
+        rmtree(bld_dir)
 
     bld_dir.mkdir(parents=True, exist_ok=True)
 
