@@ -8,7 +8,7 @@ TEST_CASE("Pan parameter accepts mid-range values", "[Pulsar][SaveRestore]")
     TestUtils::SetupAndTeardown setup;
     PulsarAudioProcessor processor;
 
-    auto* fundParam = processor.apvts.getParameter("Fundamental Freq");
-    REQUIRE(fundParam != 0);
+    auto* fundParam = processor.apvts.getParameter(Pulsar::kFundamentalFreqID);
+    REQUIRE(fundParam != nullptr);
 
 }

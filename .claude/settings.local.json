@@ -17,7 +17,9 @@
       "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/sign_builds.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/sign_builds.py)",
       "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/sign_installers.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/sign_installers.py)",
       "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/release_workflow.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/release_workflow.py)",
-      "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/build_installer.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/build_installer.py)"
+      "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/build_installer.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/build_installer.py)",
+      "Bash(mkdir -p HELPER_SCRIPTS/SOUNDS)",
+      "Bash(cp SUBMODULES/RD/HELPER_SCRIPTS/SOUNDS/success_sound.wav SUBMODULES/RD/HELPER_SCRIPTS/SOUNDS/failure_sound.wav HELPER_SCRIPTS/SOUNDS/)"
     ]
   }
 }
