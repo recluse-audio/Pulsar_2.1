@@ -49,25 +49,21 @@ def generate_files_list(root_folders, output_file, variable_name):
 
 def discover_source_folders():
     """
-    Discover all SOURCE directories in project and submodules.
+    Discover SOURCE directories in the main project.
+
+    Submodule SOURCE trees are NOT auto-scanned. Submodules vendored for their
+    test utilities (e.g. RD's TEST_UTILS) often carry source files with
+    additional include-path requirements that Pulsar does not satisfy. If a
+    future submodule needs its sources compiled into Pulsar, add the path
+    explicitly here.
 
     Returns:
         List of directory paths
     """
     folders = []
 
-    # Main SOURCE directory
     if os.path.exists('SOURCE'):
         folders.append('SOURCE')
-
-    # Check for SOURCE in any submodules (excluding JUCE)
-    submodules_dir = Path('SUBMODULES')
-    if submodules_dir.exists():
-        for item in submodules_dir.iterdir():
-            if item.is_dir() and item.name != 'JUCE':
-                source_dir = item / 'SOURCE'
-                if source_dir.exists():
-                    folders.append(str(source_dir).replace('\\', '/'))
 
     return folders
 
@@ -75,6 +71,10 @@ def discover_source_folders():
 def discover_test_folders():
     """
     Discover TESTS directories in the main project and submodules.
+
+    For submodules, only the TESTS/TEST_UTILS subdirectory is included so we
+    pick up shared test helpers without sweeping in the submodule's own
+    TEST_CASE source files.
 
     Returns:
         List of directory paths
@@ -84,6 +84,15 @@ def discover_test_folders():
     # Main TESTS directory
     if os.path.exists('TESTS'):
         folders.append('TESTS')
+
+    # TEST_UTILS in any submodule (excluding JUCE)
+    submodules_dir = Path('SUBMODULES')
+    if submodules_dir.exists():
+        for item in submodules_dir.iterdir():
+            if item.is_dir() and item.name != 'JUCE':
+                test_utils_dir = item / 'TESTS' / 'TEST_UTILS'
+                if test_utils_dir.exists():
+                    folders.append(str(test_utils_dir).replace('\\', '/'))
 
     return folders
 

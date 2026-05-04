@@ -21,6 +21,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE integration
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# MSVC: enable /FS globally so parallel cl.exe invocations can share PDBs.
+# Required for fetched dependencies (e.g. Catch2) that don't otherwise opt in.
+if(MSVC)
+    add_compile_options(/FS)
+endif()
+
 # Find Python (uses python3 on macOS/Linux, python on Windows)
 find_package(Python3 REQUIRED)
 

@@ -23,7 +23,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from build_complete import find_cmake
+from build_complete import find_cmake, beep
 
 # Plugin name must match the CMake target defined in CMakeLists.txt
 PLUGIN_NAME = "Pulsar"
@@ -146,7 +146,16 @@ def main() -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main())
+        rc = main()
+        if rc == 0:
+            beep(success=True)
+        else:
+            beep(success=False)
+        raise SystemExit(rc)
     except subprocess.CalledProcessError as e:
+        beep(success=False)
         print(f"\nBuild failed with exit code {e.returncode}", file=sys.stderr)
+        raise
+    except Exception:
+        beep(success=False)
         raise
