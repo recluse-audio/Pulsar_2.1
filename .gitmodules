@@ -1,3 +1,6 @@
 [submodule "SUBMODULES/JUCE"]
 	path = SUBMODULES/JUCE
 	url = https://github.com/juce-framework/JUCE.git
+[submodule "SUBMODULES/RD"]
+	path = SUBMODULES/RD
+	url = https://github.com/recluse-audio/RD.git

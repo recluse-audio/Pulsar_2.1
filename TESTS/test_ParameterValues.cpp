@@ -4,6 +4,8 @@
 
 TEST_CASE("Pan parameter accepts mid-range values", "[Pulsar][Parameters][Pan]")
 {
+    TestUtils::SetupAndTeardown setup;
+
     PulsarAudioProcessor processor;
     auto* param = processor.apvts.getParameter("Pan");
     REQUIRE(param != nullptr);
