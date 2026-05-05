@@ -111,6 +111,11 @@ Version is tracked in `VERSION.txt`. The build system automatically generates
 2. Run `python HELPER_SCRIPTS/regenSource.py` to update `CMAKE/TESTS.cmake`
 3. Run `python HELPER_SCRIPTS/build_tests.py`
 
+### Run AUVAL ###
+```
+auval -v aumu Plsr Rcls
+```
+
 ## License
 
 [Add your license here]

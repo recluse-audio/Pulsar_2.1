@@ -43,4 +43,4 @@ Tests are gated by `-DBUILD_TESTS=ON` (set by `build_tests.py`). The `Tests` tar
 
 ## Versioning and releases
 
-`VERSION.txt` is the source of truth (currently `1.1.80`). The build target `update_version_header` writes `SOURCE/Util/Version.h` from it — do not edit that header directly. Releases are dispatched per-platform by `release_workflow.py`, which delegates to `SIGNED/release_workflow_{mac,pc}.py`. Windows installers are built by `INSTALLERS/Pulsar.iss` (Inno Setup 6); update its version field to match `VERSION.txt`.
+`VERSION.txt` is the source of truth. The build target `update_version_header` writes `SOURCE/Util/Version.h` from it — do not edit that header directly. Releases are dispatched per-platform by `release_workflow.py`, which delegates to `SIGNED/release_workflow_{mac,pc}.py`. Windows installers are built by `INSTALLERS/PC/Pulsar.iss` (Inno Setup 6); macOS installers are built by `INSTALLERS/MAC/build_mac_installer.py` (`pkgbuild` + `productbuild`).
