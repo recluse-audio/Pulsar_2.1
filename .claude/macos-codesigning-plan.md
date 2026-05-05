@@ -47,137 +47,114 @@ So the goal of this plan is: fill in the seven stubs above so that running `pyth
 
 ---
 
-## Phase 4: Identify Team ID — IN PROGRESS
+## Phase 4: Identify Team ID — DONE
 
-- [ ] `security find-identity -v -p codesigning` — note 10-character Team ID in parentheses after each cert name
+- [x] `security find-identity -v` — confirmed both certs present
+- [x] Team ID: `KP3927B3MT`
+- [x] Developer ID Application: `"Developer ID Application: Ryan Devens (KP3927B3MT)"` (SHA1: `B36A96E26580C3E42C1D900E16DE72B537C49A60`)
+- [x] Developer ID Installer: `"Developer ID Installer: Ryan Devens (KP3927B3MT)"` (SHA1: `073E5742DC39256778D100A054A6A9CD1405877F`)
+- [x] Recorded in Reference Values block below
 - [ ] Save Team ID to password manager alongside `.p12` files
-- [ ] Record values in the "Reference Values" block at the bottom of this file
 
-## Phase 5: Notarization Credentials
+## Phase 5: Notarization Credentials — DONE
 
-- [ ] `xcrun notarytool --version` — confirm command-line tools installed (run `xcode-select --install` if missing)
-- [ ] Generate app-specific password at appleid.apple.com → Sign-In and Security → App-Specific Passwords (label: `notarytool`)
-- [ ] Store credentials in keychain (one line, no backslashes):
-  ```
-  xcrun notarytool store-credentials "notary-profile" \
-    --apple-id "you@example.com" \
-    --team-id "YOURTEAMID" \
-    --password "xxxx-xxxx-xxxx-xxxx"
-  ```
-- [ ] Verify: `xcrun notarytool history --keychain-profile "notary-profile"` returns without auth error
+- [x] `xcrun notarytool --version` → 1.1.1 (40), Command Line Tools at `/Library/Developer/CommandLineTools`
+- [x] App-specific password generated at appleid.apple.com (labeled `notarytool`)
+- [x] Credentials stored in keychain under profile name `notary-profile`
+- [x] Verified: `xcrun notarytool history --keychain-profile "notary-profile"` returns "no submissions history" with no auth error
 
-## Phase 6: First-Test Signing (Manual, Before Scripting)
+## Phase 6: First-Test Signing (Manual, Before Scripting) — DONE
 
-Goal: prove the cert + entitlements work on one already-built artifact before automating. Pick a freshly-built `BUILD/Pulsar_artefacts/Release/VST3/Pulsar.vst3`.
+All three formats smoke-tested by signing a copy in `/tmp/`:
 
-- [ ] Sign any embedded dylibs/frameworks first (inside-out signing). For JUCE plugins this is normally not needed — the bundle has no embedded helpers — but verify with `find Pulsar.vst3 -type f` before assuming.
-- [ ] Sign the bundle:
-  ```
-  codesign --force --timestamp --options runtime \
-    --sign "Developer ID Application: Your Name (TEAMID)" \
-    Pulsar.vst3
-  ```
-- [ ] Verify:
-  ```
-  codesign --verify --deep --strict --verbose=2 Pulsar.vst3
-  spctl -a -vvv -t install Pulsar.vst3
-  ```
-- [ ] If it complains about JIT or unsigned dylib loads, author a `Pulsar.entitlements` plist and resign with `--entitlements`. Pulsar is a synth with no scripting/JIT, so default entitlements should suffice — only add entitlements if signing actually fails.
+- [x] **VST3** (`Pulsar.vst3`) — signed cleanly. Before: `Signature=adhoc, TeamIdentifier=not set`. After: `flags=0x10000(runtime), TeamIdentifier=KP3927B3MT, Timestamp=May 4 2026 5:56:18 PM`. `codesign --verify --deep --strict` exit 0. `spctl -t install` rejected with `source=Unnotarized Developer ID` (expected — notarization in Phase 11).
+- [x] **AU** (`Pulsar.component`) — signed cleanly. Before: `flags=0x20002(adhoc,linker-signed), Identifier=Pulsar (bare), Info.plist=not bound, Sealed Resources=none`. After: `flags=0x10000(runtime), Identifier=com.recluseaudio.pulsar, Info.plist entries=12, Sealed Resources version=2`. Signing properly bound the Info.plist that JUCE's linker-signed adhoc had left unbound. `verify` exit 0; `spctl -t install` rejected for unnotarized.
+- [x] **Standalone** (`Pulsar.app`) — signed cleanly. Same shape as AU. `verify` exit 0; `spctl -t exec` rejected for unnotarized.
 
-## Phase 7: Implement `SIGNED/MAC/sign_mac_*.py` Build Scripts
+**Confirmed:**
+- Cert + private key chain works end-to-end (Authority chain: Developer ID Application → Developer ID CA → Apple Root CA)
+- `--timestamp` reaches Apple's timestamp server
+- `--options runtime` (hardened runtime) accepts cleanly
+- **No entitlements needed** — JUCE's default plugin/app layout signs without a custom `.entitlements` plist
+- All current Release builds are arm64-only (`Format=bundle with Mach-O thin (arm64)`). Universal-binary support is a separate concern; not blocking for local-mac signing pipeline.
+- All bundles have no embedded helpers/frameworks (`find Pulsar.vst3 -type f` returned only Info.plist, PkgInfo, the Mach-O, _CodeSignature/CodeResources, and Resources/moduleinfo.json) — single-pass `codesign` on the bundle is sufficient.
 
-Mirror the structure of `SIGNED/PC/sign_pc_vst3.py` (read it first):
-1. Use `plugin_info.get_plugin_info(ROOT)` to get `target` and `product_name`.
-2. Resolve source path under `BUILD/{target}_artefacts/Release/{VST3|Standalone|AU}/`.
-3. `shutil.copytree` (bundle) or `shutil.copy2` (file) into `SIGNED/MAC/OUTPUT/`.
-4. Run `codesign --force --timestamp --options runtime --sign "Developer ID Application: ... (TEAMID)" <copied-artifact>`.
-5. Return `subprocess.run().returncode`.
+**Quirk to remember:** JUCE's pre-signing AU has `Sealed Resources=none, Info.plist=not bound`. This is the linker-signed adhoc state and is normal — `codesign --force --sign ...` replaces it cleanly.
 
-Per-script targets:
-- [ ] `sign_mac_vst3.py` — bundle: `Pulsar.vst3` (full bundle, sign at the bundle level — `codesign` handles inside-out for properly-formed bundles)
-- [ ] `sign_mac_standalone.py` — bundle: `Pulsar.app`
-- [ ] `sign_mac_AU.py` — bundle: `Pulsar.component`
-- [ ] Decision: where to source the signing identity name — env var (e.g. `PULSAR_MAC_DEVID_APP`), config file, or hardcoded `~/.pulsar_signing.json`? PC pipeline reads from `~/.azure/metadata.json`. Recommend a similar `~/.pulsar/macos_signing.json` with `developer_id_application` and `developer_id_installer` cert names + `notary_profile` name. Decide and apply consistently across all four scripts.
+## Phase 7: Implement `SIGNED/MAC/sign_mac_*.py` Build Scripts — DONE
 
-## Phase 8: Implement `SIGNED/MAC/check_if_signed_mac.py`
+Implemented and verified end-to-end against current Release builds. Each script copies the bundle from `BUILD/Pulsar_artefacts/Release/<format>/` into `SIGNED/MAC/OUTPUT/` then runs `codesign --force --timestamp --options runtime --sign <identity> <copied-bundle>`.
 
-Replace the stub `verify()` with real checks. Keep the existing CLI surface (accepts file paths as args, falls back to scanning `OUTPUT/`). For each path:
-- [ ] `codesign --verify --deep --strict <path>` — fail if non-zero
-- [ ] `codesign -dv --verbose=4 <path>` — parse output to confirm "Authority=Developer ID Application: ..." line exists
-- [ ] For `.pkg` files: use `pkgutil --check-signature <path>` instead of `codesign`
-- [ ] Return `True` only if every check passes
-- [ ] Used by `release_workflow_mac.py` step 3 (assert unsigned before signing) and step 5 (assert signed after)
+- [x] `SIGNED/MAC/mac_identity.py` — keychain identity lookup via `security find-identity -v`. No JSON config file. Env overrides: `PULSAR_DEVID_APP`, `PULSAR_DEVID_INSTALLER`, `PULSAR_NOTARY_PROFILE`. Notary profile defaults to `"notary-profile"`.
+- [x] `sign_mac_vst3.py` — output: `SIGNED/MAC/OUTPUT/Pulsar.vst3`. Verified: `codesign --verify --deep --strict` exit 0; `spctl -t install` rejects unnotarized (expected).
+- [x] `sign_mac_AU.py` — output: `SIGNED/MAC/OUTPUT/Pulsar.component`. Same verification result.
+- [x] `sign_mac_standalone.py` — output: `SIGNED/MAC/OUTPUT/Pulsar.app`. Same verification result.
 
-## Phase 9: Implement `INSTALLERS/MAC/build_mac_installer.py`
+Identity resolution decision (resolved): **read directly from the keychain.** Earlier proposals (`~/.pulsar/macos_signing.json`, `~/.apple-developer/pulsar_signing.json`) were rejected — keychain is the OS-canonical source of truth, and we already populated it in Phases 4–5. Avoids a parallel JSON config that needs to be kept in sync. Env-var overrides are the escape hatch for CI / multi-identity use.
 
-Build a signed, notarizable `.pkg` from the signed bundles in `SIGNED/MAC/OUTPUT/`.
+The umbrella dispatcher `HELPER_SCRIPTS/sign_builds.py` already routes to these three scripts on darwin — no changes needed there.
 
-- [ ] Stage a build root with the install layout:
-  - `build_root/Library/Audio/Plug-Ins/VST3/Pulsar.vst3`
-  - `build_root/Library/Audio/Plug-Ins/Components/Pulsar.component`
-  - `build_root/Applications/Pulsar.app`
-- [ ] `pkgbuild --root build_root --identifier com.recluseaudio.pulsar --version $(cat VERSION.txt) --install-location / Pulsar-component.pkg`
-- [ ] `productbuild --distribution distribution.xml --package-path . --sign "Developer ID Installer: ... (TEAMID)" Pulsar.pkg`
-- [ ] Emit a `distribution.xml` template alongside the script (or generate it in-script from `plugin_info`); include welcome/license/conclusion text if desired
-- [ ] Output to `INSTALLERS/MAC/BUILD/Pulsar_v{version}_macOS_Installer.pkg` (mirror PC's `INSTALLERS/PC/BUILD/`)
-- [ ] Decision: are we shipping all three formats in one installer, or split? PC ships VST3 + Standalone in one `.exe`. Recommend: match — one `.pkg` containing VST3 + AU + Standalone, with optional component selection in `distribution.xml`.
+## Phase 8: Implement `SIGNED/MAC/check_if_signed_mac.py` — DONE
 
-## Phase 10: Implement `SIGNED/MAC/sign_mac_installer.py`
+- [x] Implemented `verify(file)` with two paths:
+  - Bundles (`.vst3`, `.component`, `.app`): runs `codesign --verify --deep --strict --verbose=2`, then `codesign -dv --verbose=2`, asserts no `Signature=adhoc` and at least one `Authority=Developer ID Application:` or `Authority=Developer ID Installer:` line.
+  - Packages (`.pkg`): runs `pkgutil --check-signature` and asserts `"Developer ID Installer:"` appears in the output.
+- [x] Tested against signed OUTPUT/ bundles → all 3 pass, exit 0.
+- [x] Tested against raw `BUILD/Pulsar.vst3` (adhoc-signed by JUCE) → fails with exit 1. The actual error is `invalid Info.plist (plist or signature have been modified)` because something modifies Info.plist after JUCE's link-time adhoc signing — this is expected; `codesign --force --sign` overwrites the broken adhoc with a fresh Developer ID signature in Phase 7.
+- [ ] `.pkg` branch not yet exercised — will be tested when Phase 9 produces a real installer.
 
-This is separate from `sign_mac_*` build scripts because the installer uses the **Developer ID Installer** cert (not Application).
+## Phase 9: Implement `INSTALLERS/MAC/build_mac_installer.py` — DONE
 
-- [ ] If `productbuild --sign` already produced a signed pkg in Phase 9, this script may just copy the pkg to `SIGNED/MAC/OUTPUT/` and verify. Decide: do we sign at productbuild time, or build unsigned then sign here with `productsign`?
-  - PC pattern: `build_pc_installer.py` builds unsigned, then `sign_pc_installer.py` signs. **Match this.**
-- [ ] So: `INSTALLERS/MAC/build_mac_installer.py` should use `pkgbuild` + `productbuild` *without* `--sign`, producing an unsigned pkg.
-- [ ] `sign_mac_installer.py` then runs:
-  ```
-  productsign --sign "Developer ID Installer: ... (TEAMID)" \
-    --timestamp \
-    INSTALLERS/MAC/BUILD/Pulsar_v{version}_macOS_Installer.pkg \
-    SIGNED/MAC/OUTPUT/Pulsar_v{version}_macOS_Installer.pkg
-  ```
+Builds an **unsigned** distribution pkg from signed bundles in `SIGNED/MAC/OUTPUT/`. Outer pkg signing is Phase 10.
 
-## Phase 11: Notarize + Staple (New Step in Mac Pipeline)
+- [x] Single distribution pkg containing 3 component pkgs: VST3 (→ `/Library/Audio/Plug-Ins/VST3/`), AU (→ `/Library/Audio/Plug-Ins/Components/`), Standalone (→ `/Applications/`).
+- [x] `pkgbuild` builds component pkgs into a temp dir, then `productbuild` composes them via a generated `distribution.xml` (with `customize="always"` so users can opt out of formats).
+- [x] Output: `INSTALLERS/MAC/BUILD/Pulsar_v{version}_macOS_Installer.pkg` (4.7MB for v1.1.83 build). Mirrors PC's `INSTALLERS/PC/BUILD/` location.
+- [x] Verified: `pkgutil --check-signature` on output reports `Status: no signature` (expected — unsigned). `check_if_signed_mac.py` correctly fails it with exit 1.
+- [x] Verified: `pkgutil --expand` shows the embedded distribution.xml is well-formed with correct identifiers (`com.recluseaudio.pulsar.{vst3,au,standalone}`), `auth="root"`, and the three component pkgs nested inside.
 
-PC has no equivalent — Windows EV signing is trusted directly. macOS requires notarization. This adds a step the PC workflow doesn't have.
+## Phase 10: Implement `SIGNED/MAC/sign_mac_installer.py` — DONE
 
-- [ ] After signing the installer, submit:
-  ```
-  xcrun notarytool submit SIGNED/MAC/OUTPUT/Pulsar_v{version}_macOS_Installer.pkg \
-    --keychain-profile "notary-profile" \
-    --wait
-  ```
-- [ ] On success, staple:
-  ```
-  xcrun stapler staple SIGNED/MAC/OUTPUT/Pulsar_v{version}_macOS_Installer.pkg
-  xcrun stapler validate SIGNED/MAC/OUTPUT/Pulsar_v{version}_macOS_Installer.pkg
-  ```
-- [ ] On failure: `xcrun notarytool log <id> --keychain-profile "notary-profile"`, fix, resubmit.
-- [ ] Decision: where does this live? Two options:
-  - (A) Inline as a new step in `release_workflow_mac.py` (between step 8 "verify installer signed" and step 9 "copy to RELEASE/")
-  - (B) Standalone script `SIGNED/MAC/notarize_mac.py` called from the workflow
-  - **Recommend (B)** — keeps the orchestrator readable, makes it independently testable.
-- [ ] Notarize + staple the installer pkg. Bundles inside the pkg inherit the staple via the installer; if we ever distribute raw `.vst3`/`.component` outside of an installer, those will need their own staples (zip → notarize → unzip → staple — or distribute as a notarized dmg).
+- [x] Reads the latest unsigned pkg from `INSTALLERS/MAC/BUILD/{name}_v*_macOS_Installer.pkg`, signs with `productsign --sign <Developer ID Installer> --timestamp`, writes to `SIGNED/MAC/OUTPUT/`.
+- [x] Identity comes from `mac_identity.developer_id_installer()` (keychain lookup; `PULSAR_DEVID_INSTALLER` env override).
+- [x] Verified end-to-end: signed pkg passes `check_if_signed_mac.py` with exit 0. Cert chain: Developer ID Installer → Developer ID CA → Apple Root CA. Trusted timestamp applied (2026-05-04 23:59:51 UTC).
+- [x] The umbrella dispatcher `HELPER_SCRIPTS/sign_installers.py` already routes to this script on darwin — no changes needed.
 
-## Phase 12: Implement `SIGNED/release_workflow_mac.py`
+## Phase 11: Notarize + Staple — DONE
 
-Read `release_workflow_pc.py` end-to-end first, then mirror its 9 steps with macOS substitutions:
+- [x] Implemented as standalone script `SIGNED/MAC/notarize_mac.py` (option B from the plan — separately testable, keeps orchestrator readable).
+- [x] Submits with `xcrun notarytool submit --keychain-profile <profile> --wait`, parses submission id, blocks until status = Accepted.
+- [x] On success runs `xcrun stapler staple` then `xcrun stapler validate`.
+- [x] On failure prints the submission ID and the `xcrun notarytool log` command to fetch the detailed log.
+- [x] End-to-end verified on `Pulsar_v1.1.83_macOS_Installer.pkg`:
+  - Submission `0d85b9be-56f4-40a0-9bcd-fe55adb937b5` → `status: Accepted` after ~30s.
+  - `xcrun stapler staple` succeeded; `xcrun stapler validate` succeeded.
+  - `spctl -a -vvv -t install` flipped from `rejected, source=Unnotarized Developer ID` to **`accepted, source=Notarized Developer ID`**.
+  - `pkgutil --check-signature` now shows `Notarization: trusted by the Apple notary service`.
+- [x] Confirms staple-on-installer is sufficient — the bundles inside the pkg inherit trust via the installer. If raw `.vst3`/`.component` distribution outside an installer is ever needed, those would require per-bundle notarization (zip → submit → unzip → staple).
 
-| PC Step | Mac Equivalent |
+## Phase 12: Implement `SIGNED/release_workflow_mac.py` — DONE
+
+- [x] Implemented all 9 steps + the inserted step 8.5 (notarize) per the table below.
+- [x] End-to-end run on v1.1.83 succeeded: all 9 steps + 8.5 returned 0; submission `39e0a5cc-130a-4670-a8bf-3d17581cf8cd` accepted by Apple notary in ~35s; final assets copied to `RELEASE/MAC/1.1.83/` (3 bundles + signed+notarized+stapled pkg, ~17MB total). Final pkg passes `spctl -a -t install` as `source=Notarized Developer ID`.
+
+| Step | Action |
 |---|---|
-| 1. Confirm release builds exist | Check `BUILD/Pulsar_artefacts/Release/{VST3,Standalone,AU}/` paths |
-| 2. Confirm installer project exists | Check `INSTALLERS/MAC/build_mac_installer.py` exists |
-| 3. Confirm builds NOT already signed | `check_if_signed_mac.py <vst3>` should return non-zero |
-| 4. Sign release builds | `sign_builds.py` (already dispatches to mac scripts) |
-| 5. Verify builds signed | `check_if_signed_mac.py` on each output bundle |
-| 6. Update version, build installer | Read `VERSION.txt`, run `build_mac_installer.py`. **No `.iss` to patch — version flows in via `pkgbuild --version`.** |
-| 7. Sign installer | `sign_installers.py` (already dispatches to `sign_mac_installer.py`) |
-| 8. Verify installer signed | `check_if_signed_mac.py` on the signed pkg |
-| **8.5. Notarize + staple** | New step (Phase 11). PC has no equivalent. |
-| 9. Copy to `RELEASE/MAC/{version}/` | `shutil.copytree` for `.vst3`/`.component`/`.app`; `shutil.copy2` for `.pkg`. Refuse to overwrite a non-empty existing version dir. |
+| 1 | Verify VST3/AU/Standalone exist in `BUILD/Pulsar_artefacts/Release/` |
+| 2 | Verify `INSTALLERS/MAC/build_mac_installer.py` exists |
+| 3 | Assert `check_if_signed_mac.py` returns non-zero on raw BUILD VST3 (must be unsigned) |
+| 4 | Run `HELPER_SCRIPTS/sign_builds.py` (dispatches to `sign_mac_{vst3,AU,standalone}.py`) |
+| 5 | Run `check_if_signed_mac.py` against each `SIGNED/MAC/OUTPUT/` bundle, all must return 0 |
+| 6 | Run `INSTALLERS/MAC/build_mac_installer.py` (version flows in via `pkgbuild --version` — no XML patching needed unlike PC's `.iss`) |
+| 7 | Run `HELPER_SCRIPTS/sign_installers.py` (dispatches to `sign_mac_installer.py`) |
+| 8 | Run `check_if_signed_mac.py` against the signed pkg |
+| 8.5 | Run `SIGNED/MAC/notarize_mac.py` (mac-only step; PC has no equivalent) |
+| 9 | Copy bundles + pkg to `RELEASE/MAC/{version}/`. Refuse to overwrite a non-empty existing version dir. |
 
-- [ ] Implement, with the same "fail fast on non-zero return" pattern PC uses
-- [ ] Run end-to-end against a real version bump
+### Post-implementation polish
+
+- [x] **stdout interleaving fix.** Every script in the pipeline now sets `sys.stdout.reconfigure(line_buffering=True)` after imports, so prints flush per-newline instead of waiting for process exit. Previously, child process output (e.g. `codesign: replacing existing signature`) appeared in the log before the parent's setup prints, because the parent's buffered stdout flushed only at exit, by which time the child had already written directly to the inherited fd. Validated by running `sign_mac_vst3.py` standalone and confirming "Copying bundle…" → "Signing…" → "+ codesign…" → "replacing existing signature" appear in source order.
+- [x] **VERSION.txt drift detection.** Step 1 now reads `CFBundleShortVersionString` from each bundle's `Contents/Info.plist` via `plutil -extract` and aborts with exit 1 if it doesn't match `VERSION.txt`. Catches the case where someone bumps VERSION.txt without rebuilding (we saw this in the v1.1.83 run — bundles were 1.1.82 inside, pkg labeled 1.1.83 outside). The full `build_and_release_workflow.py` still calls `rebuild_all.py` first so this only fires when running `release_workflow.py` directly without a fresh build.
 
 ## Phase 13: End-to-End Verification on a Clean Mac
 
@@ -209,12 +186,14 @@ Don't trust the dev machine — its keychain trusts everything Apple signed.
 Fill in as you go. Keep this file out of git if you put real values here — `.claude/` is gitignored by default in many setups; verify before committing.
 
 ```
-Team ID:                 _______________
-Notary keychain profile: notary-profile
-Apple ID email:          _______________
+Team ID:                 KP3927B3MT
+Notary keychain profile: notary-profile  (not yet stored — Phase 5)
+Apple ID email:          _______________ (fill in once stored)
 Bundle ID:               com.recluseaudio.pulsar
-Developer ID App cert:   "Developer ID Application: ____ (TEAMID)"
-Developer ID Inst cert:  "Developer ID Installer: ____ (TEAMID)"
+Developer ID App cert:   "Developer ID Application: Ryan Devens (KP3927B3MT)"
+                         SHA1: B36A96E26580C3E42C1D900E16DE72B537C49A60
+Developer ID Inst cert:  "Developer ID Installer: Ryan Devens (KP3927B3MT)"
+                         SHA1: 073E5742DC39256778D100A054A6A9CD1405877F
 .p12 backup location:    _______________
 ```
 

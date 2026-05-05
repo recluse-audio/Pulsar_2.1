@@ -19,7 +19,16 @@
       "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/release_workflow.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/release_workflow.py)",
       "Bash(cp /c/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/HELPER_SCRIPTS/build_installer.py /c/REPOS/PLUGIN_PROJECTS/PLUGIN_SCRIPTS/HELPER_SCRIPTS/build_installer.py)",
       "Bash(mkdir -p HELPER_SCRIPTS/SOUNDS)",
-      "Bash(cp SUBMODULES/RD/HELPER_SCRIPTS/SOUNDS/success_sound.wav SUBMODULES/RD/HELPER_SCRIPTS/SOUNDS/failure_sound.wav HELPER_SCRIPTS/SOUNDS/)"
+      "Bash(cp SUBMODULES/RD/HELPER_SCRIPTS/SOUNDS/success_sound.wav SUBMODULES/RD/HELPER_SCRIPTS/SOUNDS/failure_sound.wav HELPER_SCRIPTS/SOUNDS/)",
+      "Bash(rm -rf /tmp/Pulsar.app)",
+      "Bash(cp -R /Users/ryandevens/REPOS/PLUGIN_PROJECTS/Pulsar_2.1/BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.app /tmp/Pulsar.app)",
+      "Bash(codesign -dv --verbose=2 /tmp/Pulsar.app)",
+      "Bash(plutil -extract CFBundleShortVersionString raw BUILD/Pulsar_artefacts/Release/VST3/Pulsar.vst3/Contents/Info.plist)",
+      "Bash(plutil -extract CFBundleShortVersionString raw BUILD/Pulsar_artefacts/Release/AU/Pulsar.component/Contents/Info.plist)",
+      "Bash(plutil -extract CFBundleShortVersionString raw BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.app/Contents/Info.plist)",
+      "Bash(python3 SIGNED/release_workflow_mac.py)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(python3 *)"
     ]
   }
 }
