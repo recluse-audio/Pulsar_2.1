@@ -82,12 +82,12 @@ void PulsaretFactory::calculateFreq(OwnedPulsaret& p1, OwnedPulsaret& p2)
     float pulsaretFreq2;
 
     if (randFreq1.nextFloat() < mFormRand.get() && formIsSpread.get()) // As the value approaches 1.0, we approach a 100% chance we get a random
-        pulsaretFreq1 = randFreq1.nextInt(formRange);
+        pulsaretFreq1 = (float) randFreq1.nextInt(formRange);
     else
         pulsaretFreq1 = mFormFreq.get();
 
-    if (randFreq2.nextFloat() < mFormRand2.get() && formIsSpread2.get()) 
-        pulsaretFreq2 = randFreq2.nextInt(formRange2);
+    if (randFreq2.nextFloat() < mFormRand2.get() && formIsSpread2.get())
+        pulsaretFreq2 = (float) randFreq2.nextInt(formRange2);
     else
         pulsaretFreq2 = mFormFreq2.get();
     
@@ -116,8 +116,8 @@ void PulsaretFactory::calculateWave(OwnedPulsaret& p1, OwnedPulsaret& p2)
     {
         auto waveNum = randWave.nextInt(waveRange); // notice I am using same rand object, I don't believe this causes any issues
 
-        p1.table.setTable(waveNum / 100.f);
-        p2.table.setTable(waveNum / 100.f);
+        p1.table.setTable((float) waveNum / 100.f);
+        p2.table.setTable((float) waveNum / 100.f);
 
     }
     else
@@ -130,43 +130,42 @@ void PulsaretFactory::calculateWave(OwnedPulsaret& p1, OwnedPulsaret& p2)
 
 }
 
-void PulsaretFactory::calculateRanges(OwnedPulsaret& p1, OwnedPulsaret& p2)
+void PulsaretFactory::calculateRanges([[maybe_unused]] OwnedPulsaret& p1, [[maybe_unused]] OwnedPulsaret& p2)
 {
-    if (mFormSpread.get() != 1)
+    if (! juce::exactlyEqual(mFormSpread.get(), 1.f))
     {
         formIsSpread = true;
         auto start = jlimit(100.f, 9999.f, mFormFreq.get() / mFormSpread.get());
         auto end = jlimit(101.f, 10000.f, mFormFreq.get() * mFormSpread.get());
 
-        formRange.setStart(start);
-        formRange.setEnd(end);
+        formRange.setStart((int) start);
+        formRange.setEnd((int) end);
     }
-    else if (mFormSpread.get() == 1)
+    else
     {
         formIsSpread = false;
     }
 
-    if (mFormSpread2.get() != 1)
+    if (! juce::exactlyEqual(mFormSpread2.get(), 1.f))
     {
         formIsSpread2 = true;
         auto start = jlimit(100.f, 9999.f, mFormFreq2.get() / mFormSpread2.get());
         auto end = jlimit(101.f, 10000.f, mFormFreq2.get() * mFormSpread2.get());
-        formRange2.setStart(start);
-        formRange2.setEnd(end);
+        formRange2.setStart((int) start);
+        formRange2.setEnd((int) end);
     }
-    else if (mFormSpread2.get() == 1)
+    else
     {
         formIsSpread2 = false;
     }
 
-    if (waveSpread.get() != 1)
+    if (! juce::exactlyEqual(waveSpread.get(), 1.f))
     {
         waveIsSpread = true;
         auto start = jlimit(0.f, 99.f, waveType.get() - waveSpread.get() / 2);
         auto end = jlimit(1.f, 100.f, waveType.get() + waveSpread.get() / 2);
-        waveRange.setStart(start);
-        waveRange.setEnd(end);
-
+        waveRange.setStart((int) start);
+        waveRange.setEnd((int) end);
     }
     else
     {
@@ -186,8 +185,8 @@ void PulsaretFactory::calculateDutyCycle(float wid)
 
     if (wid < 0.02)
     {
-        pulsaretSamples1 = (1 / mFormFreq.get()) * mSampleRate;
-        pulsaretSamples2 = (1 / mFormFreq2.get()) * mSampleRate;
+        pulsaretSamples1 = (float) ((1.0 / mFormFreq.get()) * mSampleRate);
+        pulsaretSamples2 = (float) ((1.0 / mFormFreq2.get()) * mSampleRate);
     }
 
 }
@@ -216,16 +215,16 @@ void PulsaretFactory::nextSmoothValue()
 
 float PulsaretFactory::getHarmonicFormant(float formFreq)
 {
-    int midi = jmap<float>(formFreq, 100.f, 10000.f, 48, 127);
+    int midi = (int) jmap<float>(formFreq, 100.f, 10000.f, 48.f, 127.f);
     int transMidi = midiTransformer.getTransformedNote(midi);
-    float freq = frequencyOfA * std::pow(2.0, (transMidi - 69) / 12.0); // freqofA set in header taken from the juce function midiMessage
+    float freq = (float) (frequencyOfA * std::pow(2.0, (transMidi - 69) / 12.0)); // freqofA set in header taken from the juce function midiMessage
    
     return freq;
 }
 /*
     returns a float freq to pass
 */
-int PulsaretFactory::getTransformedMidi(int midiNumber)
+int PulsaretFactory::getTransformedMidi([[maybe_unused]] int midiNumber)
 {
 
     return 0;

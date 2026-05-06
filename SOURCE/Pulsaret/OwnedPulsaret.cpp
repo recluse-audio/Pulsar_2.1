@@ -40,11 +40,11 @@ void OwnedPulsaret::setFrequency (float frequency) // for setting externally fro
     calculateDeltas(freq);
 }
 
-void OwnedPulsaret::calculateDeltas(float freq) // for changing based on pulsaret's pitch trajectory
+void OwnedPulsaret::calculateDeltas(float frequency) // for changing based on pulsaret's pitch trajectory
 {
-    auto tableSizeOverSampleRate = (float) tableSize / mSampleRate;
-    tableDelta = freq * tableSizeOverSampleRate;
-    env.setFrequency(freq);
+    auto tableSizeOverSampleRate = (float) tableSize / (float) mSampleRate;
+    tableDelta = frequency * tableSizeOverSampleRate;
+    env.setFrequency(frequency);
 }
 
 
@@ -127,8 +127,8 @@ float OwnedPulsaret::getNextSample() noexcept
 void OwnedPulsaret::setLengthInSamples(float numSamples)
 {
     cycleSamples = numSamples;
-    float pulsaretPeriod = (1/freq) * mSampleRate;
-    cycles = cycleSamples / pulsaretPeriod;
+    float pulsaretPeriod = (float) ((1.0 / freq) * mSampleRate);
+    cycles = (int) (cycleSamples / pulsaretPeriod);
  
     if(cycles <= 1)
     {
@@ -153,10 +153,8 @@ juce::AudioBuffer<float>& OwnedPulsaret::getEnv()
     return env.getTable();
 }
 
-void OwnedPulsaret::setContinuous(bool test)
+void OwnedPulsaret::setContinuous([[maybe_unused]] bool test)
 {
-
-    
 }
 
 void OwnedPulsaret::setAsHit()

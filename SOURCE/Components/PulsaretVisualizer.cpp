@@ -26,20 +26,19 @@ void PulsaretVisualizer::paint (juce::Graphics& g)
     auto wavetableBuffer = table.getTable();
     auto w = getLocalBounds().getWidth();
     auto h = getLocalBounds().getHeight();
-    auto frameHalf = h / 2;
+    float frameHalf = (float) h / 2.f;
 
     float waveIncrement = (float) w / (float)wavetableBuffer.getNumSamples();
-    
+
     juce::Rectangle<int> waveFrame = {0,0, w, h};
 
     g.fillRoundedRectangle(waveFrame.toFloat(), 5.f);
-    
-    auto hue = 1.f - amp;
+
     g.setColour(waveColour.withMultipliedLightness(amp));
 
-    juce::Path wavePath;
-    
-    wavePath.startNewSubPath(0, frameHalf);
+    wavePath.clear();
+
+    wavePath.startNewSubPath(0.f, frameHalf);
 
     //auto* buffRead2 = pulsaretTable.getNextTable().getReadPointer(0);
 
@@ -60,12 +59,12 @@ void PulsaretVisualizer::paint (juce::Graphics& g)
 
     for (int i = 0; i < wavetableBuffer.getNumSamples() - 1; ++i)
     {
-        auto x = i * waveIncrement;
+        auto x = (float) i * waveIncrement;
         auto value1 = buffRead1[i];
         auto y = frameHalf - (value1 * frameHalf * 0.9f);
         wavePath.lineTo(x, y);
     }
-    wavePath.lineTo(w, frameHalf);
+    wavePath.lineTo((float) w, frameHalf);
 
    
     //float lineThickness = juce::NormalisableRange<float>(0.f, 1.f, 1.f, 7.f).convertFrom0to1(ampGlow);

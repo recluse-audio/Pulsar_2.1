@@ -15,8 +15,8 @@
 PulsarSlider::PulsarSlider(PulsarAudioProcessor& p,
     SliderType type, const String& labelText,
     bool hasButton = false, const String& buttonText = { "" },
-    bool hasIncDecSlider = { false }) 
-    : audioProcessor(p), sliderType(type)
+    bool hasIncDecSlider = false)
+    : sliderType(type), audioProcessor(p)
 {
     auto threeValue = SliderStyle::ThreeValueVertical;
     auto sliderBarStyle = SliderStyle::LinearBarVertical;
@@ -103,7 +103,7 @@ PulsarSlider::~PulsarSlider()
 {
 }
 
-void PulsarSlider::attachToState(AudioProcessorValueTreeState& stateToUse, 
+void PulsarSlider::attachToState([[maybe_unused]] AudioProcessorValueTreeState& stateToUse,
     const String& sliderParamID, const String& spreadParamID,
     const String& randParamID)
 {
@@ -114,8 +114,8 @@ void PulsarSlider::attachToState(AudioProcessorValueTreeState& stateToUse,
     randAttachment = std::make_unique<Attachment>(audioProcessor.apvts, randParamID, *randSlider);
 }
 
-void PulsarSlider::attachToState(AudioProcessorValueTreeState& stateToUse, 
-    const String& sliderParamID, const String& spreadParamID, 
+void PulsarSlider::attachToState([[maybe_unused]] AudioProcessorValueTreeState& stateToUse,
+    const String& sliderParamID, const String& spreadParamID,
     const String& randParamID, const String& buttonParamID = { "empty" })
 {
     setParamIDs(sliderParamID, spreadParamID, randParamID);
@@ -127,8 +127,8 @@ void PulsarSlider::attachToState(AudioProcessorValueTreeState& stateToUse,
     buttonAttachment = std::make_unique<bAttachment>(audioProcessor.apvts, buttonParamID, *button);
 }
 
-void PulsarSlider::attachToState(AudioProcessorValueTreeState& stateToUse, 
-    const String& sliderParamID, const String& spreadParamID, 
+void PulsarSlider::attachToState([[maybe_unused]] AudioProcessorValueTreeState& stateToUse,
+    const String& sliderParamID, const String& spreadParamID,
     const String& randParamID, const String& buttonParamID = { "empty" },
     const String& keyParamID = { "empty" }, const String& scaleParamID = { "empty" })
 {
@@ -143,9 +143,9 @@ void PulsarSlider::attachToState(AudioProcessorValueTreeState& stateToUse,
     scaleAttachment = std::make_unique<Attachment>(audioProcessor.apvts, scaleParamID, *scaleSlider);
 }
 
-void PulsarSlider::setParamIDs(const juce::String& slider, const juce::String& spread, const juce::String& rand)
+void PulsarSlider::setParamIDs(const juce::String& sliderID, const juce::String& spread, const juce::String& rand)
 {
-    sliderParam = slider; spreadParam = spread, randParam = rand;
+    sliderParam = sliderID; spreadParam = spread, randParam = rand;
 }
 
 
@@ -192,9 +192,9 @@ void PulsarSlider::resized()
     }
 }
 
-void PulsarSlider::buttonClicked(Button* b)
+void PulsarSlider::buttonClicked([[maybe_unused]] Button* b)
 {
-    
+
 }
 
 void PulsarSlider::buttonStateChanged(Button* b)
@@ -211,7 +211,7 @@ void PulsarSlider::buttonStateChanged(Button* b)
                 slider->textFromValueFunction = [](float sliderValue)
                 {
                     // DBG(sliderValue);
-                    if (sliderValue == 1)
+                    if (juce::exactlyEqual(sliderValue, 1.f))
                         return "1/1";
                     if (sliderValue > 1 && sliderValue <= 10)
                         return "1/2";
@@ -233,6 +233,7 @@ void PulsarSlider::buttonStateChanged(Button* b)
                         return "1/32";
                     if (sliderValue > 160)
                         return "1/32T";
+                    return "";
                 };
             }
             else
@@ -265,6 +266,7 @@ void PulsarSlider::buttonStateChanged(Button* b)
                 case 5:
                     return "Neg(big)";
                 }
+                return "";
             };
 
             if (b->getToggleState())
@@ -322,6 +324,7 @@ void PulsarSlider::sliderValueChanged(Slider* s)
             case 11:
                 return "B";
             }
+            return "";
         };
     }
 
@@ -344,6 +347,7 @@ void PulsarSlider::sliderValueChanged(Slider* s)
             case 5:
                 return "Neg(big)";
             }
+            return "";
         };
     }
 
@@ -372,12 +376,12 @@ void PulsarSlider::sliderValueChanged(Slider* s)
                 mid = param;
                 max = param * spread;
             }
-            else if (spread == spreadRange.end)
+            else if (juce::exactlyEqual(spread, spreadRange.end))
             {
                 min = range.start;
                 max = range.end;
             }
-            else if (spread == spreadRange.start)
+            else if (juce::exactlyEqual(spread, spreadRange.start))
             {
                 multiSlider->setColour(Slider::backgroundColourId, Colours::transparentBlack.withAlpha(0.f));
             }
@@ -390,12 +394,12 @@ void PulsarSlider::sliderValueChanged(Slider* s)
                 mid = param;
                 max = param + (spread/2);
             }
-            else if (spread == spreadRange.end)
+            else if (juce::exactlyEqual(spread, spreadRange.end))
             {
                 min = range.start;
                 max = range.end;
             }
-            else if (spread == spreadRange.start)
+            else if (juce::exactlyEqual(spread, spreadRange.start))
             {
                 multiSlider->setColour(Slider::backgroundColourId, Colours::transparentBlack.withAlpha(0.f));
             }

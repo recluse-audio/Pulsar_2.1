@@ -47,7 +47,7 @@ void PulsarTrain::prepare(double sampleRate)
 
 void PulsarTrain::startTrain()
 {
-    pulsarPeriod = (1 / mFundFreq.get()) * mSampleRate;
+    pulsarPeriod = (int) ((1.0 / mFundFreq.get()) * mSampleRate);
     samplesRemainingInPeriod = pulsarPeriod;
 }
 
@@ -62,17 +62,17 @@ int PulsarTrain::getPeriod()
     auto freq = mFundFreq.get();
 
     if(fundIsSpread.get() && randFund.nextFloat() <= mFundRand.get())
-        freq = randFund.nextInt(fundRange);
-    
+        freq = (float) randFund.nextInt(fundRange);
+
     if (inSyncMode.get())
     {
         freq = tempoSync.getSynchronizedFreq(freq);
-       
+
     }
 
-    pulsarPeriod = (1 / freq) * mSampleRate;
+    pulsarPeriod = (int) ((1.0 / freq) * mSampleRate);
 
-    pulsaretFactory.passPulsarPeriod(pulsarPeriod); // used to calculate duty cycle
+    pulsaretFactory.passPulsarPeriod((float) pulsarPeriod); // used to calculate duty cycle
 
     return pulsarPeriod;
 }
@@ -212,9 +212,9 @@ void PulsarTrain::generateNextBlock(juce::AudioBuffer<float>& buffer)
 
 void PulsarTrain::flipFlashStateAtHalfPulsarPeriod()
 {
-    float flashCycle = getPeriod() / 2.f;
-    
-    if (samplesRemainingInPeriod < flashCycle)
+    float flashCycle = (float) getPeriod() / 2.f;
+
+    if ((float) samplesRemainingInPeriod < flashCycle)
     {
         isFlashing = false;
     }
@@ -271,9 +271,9 @@ void PulsarTrain::setTrigger(int on, int off)
     }
 }
 
-void PulsarTrain::setGlideTime(float glideTime)
+void PulsarTrain::setGlideTime(float glideTimeMs)
 {
-    auto seconds = glideTime / 1000;
+    auto seconds = glideTimeMs / 1000.f;
     smoothFund.reset(mSampleRate, seconds);
     pulsaretFactory.setGlideTime(seconds);
 }
@@ -289,48 +289,48 @@ void PulsarTrain::setEnv()
 
 void PulsarTrain::calculateRanges()
 {
-    if(mFundSpread.get() != 1)
+    if (! juce::exactlyEqual(mFundSpread.get(), 1.f))
     {
         fundIsSpread = true;
         auto start = jlimit(1.f, 199.f, mFundFreq.get() / mFundSpread.get());
         auto end = jlimit(2.f, 200.f, mFundFreq.get() * mFundSpread.get());
-        fundRange.setStart(start);
-        fundRange.setEnd(end);
+        fundRange.setStart((int) start);
+        fundRange.setEnd((int) end);
     }
-    else if (mFundSpread.get() == 1)
+    else
     {
         fundIsSpread = false;
     }
 
-    
-    if(panSpread.get() != 1)
+
+    if (! juce::exactlyEqual(panSpread.get(), 1.f))
     {
         panIsSpread = true;
         auto start = jlimit(0.f, 99.f, panR.get() - panSpread.get()/2);
         auto end = jlimit(1.f, 100.f, panR.get() + panSpread.get()/2);
-        
-        panRange.setStart(start);
-        panRange.setEnd(end);
+
+        panRange.setStart((int) start);
+        panRange.setEnd((int) end);
     }
-    else if(panSpread.get() == 1)
+    else
     {
         panIsSpread = false;
     }
-   
-    
-    if (mAmpSpread.get() != 1)
+
+
+    if (! juce::exactlyEqual(mAmpSpread.get(), 1.f))
     {
         ampIsSpread = true;
         auto start = jlimit(0.f, 99.f, mAmp.get() - mAmpSpread.get()/2);
         auto end = jlimit(1.f, 100.f, mAmp.get() + mAmpSpread.get()/2);
-        ampRange.setStart(start);
-        ampRange.setEnd(end);
+        ampRange.setStart((int) start);
+        ampRange.setEnd((int) end);
     }
     else
     {
         ampIsSpread = false;
     }
-  
+
 }
 
 /*=====================================================================================*/
@@ -347,13 +347,13 @@ void PulsarTrain::setPulsaretParamsAndTrigger()
             {
                 if (ampIsSpread.get() && randAmp.nextFloat() <= mAmpRand.get())
                 {
-                    float amp = randAmp.nextInt(ampRange); // amp in range of 0 - 100
+                    float amp = (float) randAmp.nextInt(ampRange); // amp in range of 0 - 100
                     mAmp = amp;
                 }
 
                 if (panIsSpread.get() && randPan.nextFloat() <= panRand.get())
                 {
-                    panR = randPan.nextInt(panRange); // pan in range of 0 - 100
+                    panR = (float) randPan.nextInt(panRange); // pan in range of 0 - 100
                     panL = 100.f - panR.get();
                 }
 
@@ -390,13 +390,13 @@ void PulsarTrain::setPulsaretParamsAndTrigger()
         {
             if (ampIsSpread.get() && randAmp.nextFloat() <= mAmpRand.get())
             {
-                float amp = randAmp.nextInt(ampRange); // amp in range of 0 - 100
+                float amp = (float) randAmp.nextInt(ampRange); // amp in range of 0 - 100
                 mAmp = amp;
             }
 
             if (panIsSpread.get() && randPan.nextFloat() <= panRand.get())
             {
-                panR = randPan.nextInt(panRange); // pan in range of 0 - 100
+                panR = (float) randPan.nextInt(panRange); // pan in range of 0 - 100
                 panL = 100.f - panR.get();
             }
 

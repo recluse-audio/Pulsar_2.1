@@ -20,7 +20,7 @@ NameFeel::~NameFeel()
 {
     
 }
-Font NameFeel::getLabelFont(Label& label)
+Font NameFeel::getLabelFont([[maybe_unused]] Label& label)
 {
     return getFont();
 }

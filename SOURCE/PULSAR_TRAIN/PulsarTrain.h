@@ -60,34 +60,27 @@ public:
     bool isSynchronized() { return inSyncMode.get(); }
 
 private:
-    int flashCountdown = 2048;
     int flashIndex = 0;
     TempoSync   tempoSync;
     PulsaretFactory pulsaretFactory;
-    int tableSize = 1024;
 
     juce::OwnedArray<OwnedPulsaret> pulsaretArray;
     OwnedPulsaret pulsaret1;
     OwnedPulsaret pulsaret2;
-    
+
     juce::ADSR env;
     juce::ADSR::Parameters envParam;
 
-    bool isContinuous = false;
-    
-    int  flag = 0;
     Atomic<float> attack  { 100.f };
     Atomic<float> decay   { 50.f };
     Atomic<float> sustain { 0.5f };
     Atomic<float> release { 500.f };
-    
-    float pulsaretWidth = 0.1f;
-    
+
     Atomic<bool> isFlashing{ false };
     float flashCoef = 0.f;
     bool isRunning = false;
-    
-    
+
+
     Atomic<int>  triggerOn  { 1 };
 
     int onCount = 1;
@@ -95,16 +88,12 @@ private:
 
     int offCount = 0;
     Atomic<bool> isTriggerPattern { true };
-    bool trigger;
 
-    double mSampleRate;
+    double mSampleRate = 0.0;
 
     int pulsarPeriod = 1024;
-    int pulsarPhase;
-    
-    
+
     int samplesRemainingInPeriod = 0;
-    int samplesRemainingInEnvelope = 0;
     
     Atomic<float> mAmp               { 0.0f };
     Atomic<float> mAmpSpread         { 0.0f };

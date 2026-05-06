@@ -79,9 +79,9 @@ private:
     
     int currentIndex = 0, tableSize = 2048;
 
-    float currentPhase = 0.f, tableDelta = 0.f, 
-        currentValue = 0.f, envLengthInSamples = 0.f;
+    float currentPhase = 0.f, tableDelta = 0.f,
+        currentValue = 0.f;
 
-    double mSampleRate;
+    double mSampleRate = 0.0;
     
 };

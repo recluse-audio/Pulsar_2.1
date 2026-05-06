@@ -15,7 +15,7 @@ class  MixFeel : public juce::LookAndFeel_V4
 {
 public:
     MixFeel();
-    ~MixFeel();
+    ~MixFeel() override;
     
     void drawLinearSlider (Graphics&,
                            int x, int y, int width, int height,
@@ -36,7 +36,7 @@ public:
 private:
     Font getFont()
     {
-        return Font ("Consolas", "Regular", 10.f);
+        return Font (FontOptions ("Consolas", "Regular", 10.f));
     }
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixFeel)

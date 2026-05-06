@@ -85,21 +85,21 @@ int PulsarAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void PulsarAudioProcessor::setCurrentProgram (int index)
+void PulsarAudioProcessor::setCurrentProgram ([[maybe_unused]] int index)
 {
 }
 
-const juce::String PulsarAudioProcessor::getProgramName (int index)
+const juce::String PulsarAudioProcessor::getProgramName ([[maybe_unused]] int index)
 {
     return {};
 }
 
-void PulsarAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void PulsarAudioProcessor::changeProgramName ([[maybe_unused]] int index, [[maybe_unused]] const juce::String& newName)
 {
 }
 
 //==============================================================================
-void PulsarAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void PulsarAudioProcessor::prepareToPlay (double sampleRate, [[maybe_unused]] int samplesPerBlock)
 {
     pulsarTrain.prepare(sampleRate);
 
@@ -192,7 +192,7 @@ void PulsarAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 }
 
 
-void PulsarAudioProcessor::handleMidi(juce::MidiBuffer midiBuffer)
+void PulsarAudioProcessor::handleMidi([[maybe_unused]] juce::MidiBuffer midiBuffer)
 {
    
 }

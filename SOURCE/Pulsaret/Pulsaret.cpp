@@ -33,7 +33,7 @@ void Pulsaret::prepare(double sampleRate)
 /*=========================================================*/
 void Pulsaret::setFrequency (float frequency)
 {
-    auto tableSizeOverSampleRate = (float) tableSize / mSampleRate;
+    auto tableSizeOverSampleRate = (float) tableSize / (float) mSampleRate;
     tableDelta = frequency * tableSizeOverSampleRate;
 }
 

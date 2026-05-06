@@ -15,7 +15,7 @@ class  NameFeel : public juce::LookAndFeel_V4
 {
 public:
     NameFeel();
-    ~NameFeel();
+    ~NameFeel() override;
     
     Font getLabelFont(Label&) override;
 
@@ -24,7 +24,7 @@ private:
     
     Font getFont()
     {
-        return Font ("Consolas", "Regular", 27.f);
+        return Font (FontOptions ("Consolas", "Regular", 27.f));
     }
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NameFeel)

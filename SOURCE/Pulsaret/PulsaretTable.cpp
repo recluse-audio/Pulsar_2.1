@@ -47,8 +47,8 @@ void PulsaretTable::setTable(float selection)
     
     normalWaveIndex = selection; // 0  to 1 version of waveIndex
     floatWaveIndex = NormalisableRange<float>(0.f, 3.f, 0.001f, 1.f).convertFrom0to1(selection); // converted to size of array
-    intWaveIndex = floatWaveIndex.get(); // cast to int
-    waveFraction = floatWaveIndex.get() - intWaveIndex.get(); // overlap
+    intWaveIndex = (int) floatWaveIndex.get(); // cast to int
+    waveFraction = floatWaveIndex.get() - (float) intWaveIndex.get(); // overlap
     
     
 }
@@ -104,9 +104,9 @@ float PulsaretTable::getWaveFraction()
 void PulsaretTable::setEnvLevel(float envLevel)
 {
     
-    intWaveIndex = envLevel;
+    intWaveIndex = (int) envLevel;
     floatWaveIndex = envLevel;
-    waveFraction = floatWaveIndex.get() - intWaveIndex.get();
+    waveFraction = floatWaveIndex.get() - (float) intWaveIndex.get();
     
 //    if(intWaveIndex.get() > tableArray.size())
 //        intWaveIndex = tableArray.size() - 1;
@@ -130,16 +130,16 @@ void PulsaretTable::createSineTable()
     auto pi = juce::MathConstants<double>::pi;
     double currentAngle = -pi;
     
-    for (unsigned int i = 0; i < tableSize; ++i)
+    for (int i = 0; i < tableSize; ++i)
     {
         float sample;
-        sample = std::sin(currentAngle);
-        
-        
+        sample = (float) std::sin(currentAngle);
+
+
         buffWrite[i] += sample;
         currentAngle += angleDelta;
     }
-        
+
 
     buffWrite[tableSize] = buffWrite[0];
 }
@@ -157,21 +157,21 @@ void PulsaretTable::createSincTable()
     auto pi = juce::MathConstants<double>::pi;
     double currentAngle = -pi;
     
-    for (unsigned int i = 0; i < tableSize; ++i)
+    for (int i = 0; i < tableSize; ++i)
     {
         float sample;
-        
-        if (currentAngle == 0)
+
+        if (juce::exactlyEqual(currentAngle, 0.0))
         {
             sample = 1;
         }
         else
         {
-            sample = std::sin (pi * currentAngle) / (pi * currentAngle);
+            sample = (float) (std::sin (pi * currentAngle) / (pi * currentAngle));
             buffWrite[i] += sample;
-            
+
         }
-        
+
         currentAngle += angleDelta;
     }
     
@@ -192,25 +192,25 @@ void PulsaretTable::createTriTable()
         auto angleDelta = juce::MathConstants<double>::twoPi / (double) (tableSize - 1) * harmonics[harmonic];
         auto currentAngle = 0.0;
         
-        float harmonicAmp = 0.9f / (harmonics[harmonic] * harmonics[harmonic]);
-       
-        for (unsigned int i = 0; i < tableSize; ++i)
+        float harmonicAmp = 0.9f / (float) (harmonics[harmonic] * harmonics[harmonic]);
+
+        for (int i = 0; i < tableSize; ++i)
         {
             auto sample = std::sin (currentAngle);
             buffWrite[i] += (float) sample * harmonicAmp; //harmonicWeights[harmonic];
             currentAngle += angleDelta;
         }
     }
-    
+
     for (auto harmonic = 1; harmonic < juce::numElementsInArray (harmonics); harmonic += 2)
     {
         auto angleDelta = juce::MathConstants<double>::twoPi / (double) (tableSize - 1) * harmonics[harmonic];
         auto pi = juce::MathConstants<double>::pi;
         auto currentAngle = pi;
-        
-        float harmonicAmp = 0.9f / (harmonics[harmonic] * harmonics[harmonic]);
-        
-        for (unsigned int i = 0; i < tableSize; ++i)
+
+        float harmonicAmp = 0.9f / (float) (harmonics[harmonic] * harmonics[harmonic]);
+
+        for (int i = 0; i < tableSize; ++i)
         {
             auto sample = std::sin (currentAngle);
             buffWrite[i] += (float) sample * harmonicAmp;
@@ -229,15 +229,15 @@ void PulsaretTable::createSawTable()
     
     int harmonics = 32;
     
-    for (auto i = 0; i < harmonics; i++)
+    for (auto h = 0; h < harmonics; h++)
     {
-        float harmonic = i + 1;
+        float harmonic = (float) (h + 1);
         auto angleDelta = juce::MathConstants<double>::twoPi / (double) (tableSize - 1) * harmonic;
         auto currentAngle = 0.0;
-        
+
         float harmonicAmp = 0.9f / (harmonic * harmonic);
-        
-        for (unsigned int i = 0; i < tableSize; ++i)
+
+        for (int i = 0; i < tableSize; ++i)
         {
             auto sample = std::sin (currentAngle);
             buffWrite[i] += (float) sample * harmonicAmp; //harmonicWeights[harmonic];

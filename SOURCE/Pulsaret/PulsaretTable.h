@@ -55,6 +55,4 @@ private:
     
     
     int tableSize = 1024;
-    float currentIndex = 0.0f, tableDelta = 0.0f;
-    
 };

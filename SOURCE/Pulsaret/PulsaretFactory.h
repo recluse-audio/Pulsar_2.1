@@ -59,7 +59,7 @@ private:
     std::atomic<bool> formant1Changed { false };
     Atomic<float> mFormFreq{ 600.0f };
     Atomic<float> mFormSpread{ 0.0f };
-    Atomic<float> mFormRand{ 0.05 };
+    Atomic<float> mFormRand{ 0.05f };
     Atomic<int> mFormKey{ 0 };
     Atomic<int> mFormScale{ 0 };
 
@@ -74,7 +74,7 @@ private:
     std::atomic<bool> formant2Changed { false };
     Atomic<float> mFormFreq2{ 800.0f };
     Atomic<float> mFormSpread2{ 0.f };
-    Atomic<float> mFormRand2{ 0.05 };
+    Atomic<float> mFormRand2{ 0.05f };
     Atomic<int> mFormKey2{ 0 };
     Atomic<int> mFormScale2{ 0 };
 

@@ -38,15 +38,15 @@ void MixFeel::drawLinearSlider (Graphics& g, int x, int y, int width, int height
     if(slider.getSliderStyle() == Slider::SliderStyle::LinearBarVertical)
     {
         
-        juce::Rectangle<float> bgFrame(x, y, width, height);
+        juce::Rectangle<float> bgFrame((float) x, (float) y, (float) width, (float) height);
         g.setColour(juce::Colours::whitesmoke);
         g.drawRoundedRectangle(bgFrame, 1.f, 2.f);
 
         g.setColour(juce::Colours::transparentBlack.withAlpha(0.f));
         g.fillAll();
 
-       
-        juce::Rectangle<float> centerRect(x, sliderPos, width, 2);
+
+        juce::Rectangle<float> centerRect((float) x, sliderPos, (float) width, 2.f);
         g.setColour(juce::Colours::orange);
         g.fillRoundedRectangle(centerRect, 1.f);
 
@@ -66,10 +66,10 @@ void MixFeel::drawLinearSlider (Graphics& g, int x, int y, int width, int height
         
         
         auto pos = sliderPos;
-        if (pos >= height - 3)
-            pos = height - 3;
-        
-        juce::Rectangle<int> thumb(0, pos, width, 2);
+        if (pos >= (float) height - 3.f)
+            pos = (float) height - 3.f;
+
+        juce::Rectangle<int> thumb(0, (int) pos, width, 2);
         g.setColour(juce::Colours::yellow);
         g.fillRoundedRectangle(thumb.toFloat(), 5.f);
         
@@ -94,10 +94,10 @@ void MixFeel::drawLinearSlider (Graphics& g, int x, int y, int width, int height
         g.fillAll();
         
         auto pos = sliderPos;
-        if (pos >= width - 3)
-            pos = width - 3;
-        
-        juce::Rectangle<int> thumb(pos, 0, 2, 20);
+        if (pos >= (float) width - 3.f)
+            pos = (float) width - 3.f;
+
+        juce::Rectangle<int> thumb((int) pos, 0, 2, 20);
         g.setColour(juce::Colours::yellow);
         g.fillRoundedRectangle(thumb.toFloat(), 2.f);
         
@@ -107,31 +107,31 @@ void MixFeel::drawLinearSlider (Graphics& g, int x, int y, int width, int height
     
     if(slider.getSliderStyle() == Slider::ThreeValueVertical)
     {
-        juce::Rectangle<float> bgFrame(x, y, width, height);
+        juce::Rectangle<float> bgFrame((float) x, (float) y, (float) width, (float) height);
         g.setColour(juce::Colours::white);
         g.drawRoundedRectangle(bgFrame, 1.f, 2.f);
-        
-        float h = jlimit<float>(1, height, minSliderPos - maxSliderPos);
-        float y = jlimit<float>(2, height - 2, maxSliderPos);
-        juce::Rectangle<float> fillRect(x, y, width, h);
+
+        float h = jlimit<float>(1.f, (float) height, minSliderPos - maxSliderPos);
+        float fillY = jlimit<float>(2.f, (float) height - 2.f, maxSliderPos);
+        juce::Rectangle<float> fillRect((float) x, fillY, (float) width, h);
 
         auto color = slider.findColour(Slider::backgroundColourId);
-        juce::ColourGradient gradient(color.darker(), width / 2, height, color.withHue(0.5f), width / 2, 0, false);
+        juce::ColourGradient gradient(color.darker(), (float) width / 2.f, (float) height, color.withHue(0.5f), (float) width / 2.f, 0.f, false);
 
         g.setGradientFill(gradient);
         g.fillRect(fillRect);
     }
-    
+
     if(slider.getSliderStyle() == Slider::ThreeValueHorizontal)
     {
-        juce::Rectangle<float> bgFrame(x, y, width, height);
+        juce::Rectangle<float> bgFrame((float) x, (float) y, (float) width, (float) height);
         g.setColour(juce::Colours::whitesmoke);
         g.drawRoundedRectangle(bgFrame, 1.f, 2.f);
-        
-        juce::Rectangle<float> fillRect(minSliderPos + 2, y, maxSliderPos-minSliderPos, height);
+
+        juce::Rectangle<float> fillRect(minSliderPos + 2.f, (float) y, maxSliderPos - minSliderPos, (float) height);
 
         auto color = slider.findColour(Slider::backgroundColourId);
-        juce::ColourGradient gradient(color.darker(), 0, height/2, color.withHue(0.5f), width, height/2, false);
+        juce::ColourGradient gradient(color.darker(), 0.f, (float) height / 2.f, color.withHue(0.5f), (float) width, (float) height / 2.f, false);
         g.setGradientFill(gradient);
         g.fillRect(fillRect);
     }
@@ -144,7 +144,7 @@ juce::Slider::SliderLayout MixFeel::getSliderLayout(Slider& slider)
     Slider::SliderLayout layout;
     auto bounds = slider.getLocalBounds();
     
-    juce::Rectangle<int> textBox(0, bounds.getHeight()*0.7, bounds.getWidth(), 15);
+    juce::Rectangle<int> textBox(0, (int) ((float) bounds.getHeight() * 0.7f), bounds.getWidth(), 15);
     
     layout.textBoxBounds = textBox;
     layout.sliderBounds  = bounds;
@@ -169,14 +169,14 @@ Label* MixFeel::createSliderTextBox(Slider& slider)
 
 /*=================================== FONT =========================================*/
 
-Font MixFeel::getLabelFont(Label& label)
+Font MixFeel::getLabelFont([[maybe_unused]] Label& label)
 {
    return getFont();
     
 }
 
-void MixFeel::drawButtonBackground(Graphics& g, Button& button, const Colour& backgroundColour,
-                                    bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+void MixFeel::drawButtonBackground(Graphics& g, Button& button, [[maybe_unused]] const Colour& backgroundColour,
+                                    [[maybe_unused]] bool shouldDrawButtonAsHighlighted, [[maybe_unused]] bool shouldDrawButtonAsDown)
 {
     juce::Rectangle<int> bounds = button.getLocalBounds();
     

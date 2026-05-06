@@ -12,7 +12,7 @@
 
 //==============================================================================
 PulsarAudioProcessorEditor::PulsarAudioProcessorEditor (PulsarAudioProcessor& p)
-: AudioProcessorEditor (&p), audioProcessor (p), pulsaretVisualizer(p.getTable())
+: AudioProcessorEditor (&p), pulsaretVisualizer(p.getTable()), audioProcessor (p)
 {
     setSize(600, 450);
     frame = juce::Rectangle<int>(15, 50, getWidth() - 30, getHeight() - 65);
@@ -60,14 +60,14 @@ void PulsarAudioProcessorEditor::init()
     nameLabel = std::make_unique<Label>("", "P U L S A R");
     addAndMakeVisible(nameLabel.get());
     nameLabel->setBoundsRelative(0.4f, 0.f, 0.3f, 0.1f);
-    nameLabel->setFont(Font("Consolas", "Regular", 20.f));
+    nameLabel->setFont(Font(FontOptions("Consolas", "Regular", 20.f)));
     nameLabel->setLookAndFeel(&nameFeel);
     nameLabel->setColour(juce::Label::textColourId, juce::Colours::white);
 
     versionLabel = std::make_unique<Label>("", "v" BUILD_VERSION_STRING);
     addAndMakeVisible(versionLabel.get());
     versionLabel->setBoundsRelative(0.4f, 0.08f, 0.3f, 0.05f);
-    versionLabel->setFont(Font("Consolas", "Regular", 10.f));
+    versionLabel->setFont(Font(FontOptions("Consolas", "Regular", 10.f)));
     versionLabel->setColour(juce::Label::textColourId, juce::Colours::grey);
 
 }
@@ -80,7 +80,7 @@ void PulsarAudioProcessorEditor::resetSliders()
 
     fundamentalSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Fundamental, "Fund", true, "Grid", false);
     addAndMakeVisible(fundamentalSlider.get());
-    fundamentalSlider->setBoundsRelative(0.05, 0.15, 0.15, 0.45);
+    fundamentalSlider->setBoundsRelative(0.05f, 0.15f, 0.15f, 0.45f);
     using namespace Pulsar;
 
     fundamentalSlider->attachToState(audioProcessor.apvts,
@@ -89,7 +89,7 @@ void PulsarAudioProcessorEditor::resetSliders()
 
     formantSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Formant, "Form", true, "Key", true);
     addAndMakeVisible(formantSlider.get());
-    formantSlider->setBoundsRelative(0.2, 0.15, 0.15, 0.45);
+    formantSlider->setBoundsRelative(0.2f, 0.15f, 0.15f, 0.45f);
     formantSlider->attachToState(audioProcessor.apvts,
         kFormantFreqID, kFormantSpreadID,
         kFormantRandomID, kFormantKeylockModeID,
@@ -97,7 +97,7 @@ void PulsarAudioProcessorEditor::resetSliders()
 
     formantSlider2 = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Formant, "Form2", true, "Key", true);
     addAndMakeVisible(formantSlider2.get());
-    formantSlider2->setBoundsRelative(0.35, 0.15, 0.15, 0.45);
+    formantSlider2->setBoundsRelative(0.35f, 0.15f, 0.15f, 0.45f);
     formantSlider2->attachToState(audioProcessor.apvts,
         kFormantFreq2ID, kFormantSpread2ID,
         kFormantRandom2ID, kFormant2KeylockModeID,
@@ -106,14 +106,14 @@ void PulsarAudioProcessorEditor::resetSliders()
     waveSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Standard, "Wave",
         false, "", false);
     addAndMakeVisible(waveSlider.get());
-    waveSlider->setBoundsRelative(0.5, 0.15, 0.15, 0.45);
+    waveSlider->setBoundsRelative(0.5f, 0.15f, 0.15f, 0.45f);
     waveSlider->attachToState(audioProcessor.apvts,
         kWaveTypeID, kWaveSpreadID, kWaveRandomID);
 
     ampSlider = std::make_unique<PulsarSlider>(audioProcessor, SliderType::Standard, "Amp",
         false, "", false);
     addAndMakeVisible(ampSlider.get());
-    ampSlider->setBoundsRelative(0.65, 0.15, 0.15, 0.45);
+    ampSlider->setBoundsRelative(0.65f, 0.15f, 0.15f, 0.45f);
     ampSlider->attachToState(audioProcessor.apvts,
         kAmpID, kAmpSpreadID, kAmpRandomID);
 

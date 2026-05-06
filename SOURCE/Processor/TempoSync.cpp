@@ -17,10 +17,10 @@ TempoSync::TempoSync()
 
 TempoSync::~TempoSync(){}
 
-void TempoSync::setTempo(double tempo, int timeSigNum, int timeSigDenom)
+void TempoSync::setTempo(double tempo, [[maybe_unused]] int timeSigNum, [[maybe_unused]] int timeSigDenom)
 {
     bpm = tempo;
-    quarterNote = 60000 / bpm; // 60 bpm, quarter=1000, 
+    quarterNote = (float) (60000.0 / bpm); // 60 bpm, quarter=1000,
     wholeNote = quarterNote * 4; // 
     halfNote = quarterNote * 2;
     eighthNote = quarterNote / 2;
@@ -42,7 +42,7 @@ juce::String TempoSync::getSyncString(float sliderValue)
     if (sliderValue > 400 && sliderValue <= 800)
         return "1/8";
 
-    if (sliderValue > 800 && sliderValue <= 120)
+    if (sliderValue > 800 && sliderValue <= 1200)
         return "1/4";
 
     if (sliderValue > 1200 && sliderValue <= 1600)
@@ -51,6 +51,7 @@ juce::String TempoSync::getSyncString(float sliderValue)
     if (sliderValue > 1600 && sliderValue <= 2000)
         return "1/1";
 
+    return "1/1";
 }
 
 float TempoSync::getSynchronizedFromMS(float ms)
@@ -69,6 +70,8 @@ float TempoSync::getSynchronizedFromMS(float ms)
 //
     if (ms > 1600) // max delay is one whole no
         return wholeNote;
+
+    return wholeNote;
 }
 
 // just normalizing the fund range to fit this grid, not really an accurate representation more gui enabling

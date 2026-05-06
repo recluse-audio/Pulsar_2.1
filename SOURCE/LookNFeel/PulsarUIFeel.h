@@ -14,7 +14,7 @@ class PulsarUIFeel : public juce::LookAndFeel_V4
 {
 public:
     PulsarUIFeel();
-    ~PulsarUIFeel();
+    ~PulsarUIFeel() override;
     
     void drawLinearSlider (juce::Graphics&,
                            int x, int y, int width, int height,
@@ -38,12 +38,12 @@ public:
 
     juce::Font getPopupMenuFont() override;
     juce::Font getLabelFont(juce::Label&) override;
-    Font getTextButtonFont(TextButton&, int buttonHeight) override {    return getFont().withHeight(buttonHeight*0.7f);   }
+    Font getTextButtonFont(TextButton&, int buttonHeight) override {    return getFont().withHeight((float) buttonHeight * 0.7f);   }
 
 private:
     juce::Font getFont()
     {
-        return juce::Font ("Consolas", "Regular", 10.f);
+        return juce::Font (juce::FontOptions ("Consolas", "Regular", 10.f));
     }
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PulsarUIFeel)

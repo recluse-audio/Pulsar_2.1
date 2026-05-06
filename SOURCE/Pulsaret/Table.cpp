@@ -10,7 +10,7 @@
 
 #include "Table.h"
 
-Table::Table() : interpolatedBuffer(1, 2048), table0(1, 2048), table1(1, 2048)
+Table::Table() : table0(1, 2048), table1(1, 2048), interpolatedBuffer(1, 2048)
 {
     for (int i = 0; i < 24; i++)
     {

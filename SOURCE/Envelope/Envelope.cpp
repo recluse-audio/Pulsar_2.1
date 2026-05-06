@@ -33,7 +33,7 @@ void Envelope::prepare(double sampleRate)
 void Envelope::setFrequency(float freq)
 {
     tableSize = envelopeTable.getNumSamples() - 1;
-    auto tableSizeOverSampleRate = (float) tableSize / mSampleRate; // phase step at 1hz
+    auto tableSizeOverSampleRate = (float) tableSize / (float) mSampleRate; // phase step at 1hz
     tableDelta = freq * tableSizeOverSampleRate;
 }
 
@@ -68,7 +68,7 @@ void Envelope::resetEnvelope()
 
 void Envelope::closeEnv(int sampLeft)
 {
-    currentPhase = tableSize - sampLeft;
+    currentPhase = (float) (tableSize - sampLeft);
 }
 
 float Envelope::getValueAtIndex(int index)
@@ -76,7 +76,7 @@ float Envelope::getValueAtIndex(int index)
     auto index0 = (unsigned int)index;
     auto index1 = index0 + 1;
 
-    auto frac = index - (float)index0;
+    auto frac = (float) index - (float) index0;
 
     auto* table = envelopeTable.getReadPointer(0);
     auto value0 = table[index0];
@@ -124,7 +124,7 @@ int Envelope::getTotalLengthInSamples()
 
 void Envelope::setTotalLengthInSamples(float samples)
 {
-    setTableSize(samples);
+    setTableSize((int) samples);
 }
 
 
@@ -140,20 +140,17 @@ void Envelope::createGaussian()
     envelopeTable.clear();
     
     auto* buffWrite = envelopeTable.getWritePointer (0);
-    auto pi = juce::MathConstants<double>::pi;
     auto e = juce::MathConstants<double>::euler;
-    
-    double a = 2;
+
     double b = envelopeTable.getNumSamples()/2 - 1;
-    double c = 2.35482; // FWHM for half power points, making 50% inside the points, 50% out
-   
-    
-    for (unsigned int x = 0; x < envelopeTable.getNumSamples(); ++x)
+
+
+    for (int x = 0; x < envelopeTable.getNumSamples(); ++x)
     {
         double exp = -0.5f * pow(     (  (x - b) / (0.4f * b)  ),   2);
         double sample = pow(e, exp);
-        
-        buffWrite[x] += sample;
+
+        buffWrite[x] += (float) sample;
     }
     buffWrite[tableSize] = buffWrite[0];
 }

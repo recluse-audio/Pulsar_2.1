@@ -11,34 +11,33 @@
 #include "EnvelopeVisualizer.h"
 
 //==============================================================================
-EnvelopeVisualizer::EnvelopeVisualizer(PulsarAudioProcessor& p, Envelope& e) : audioProcessor(p), env(e)
+EnvelopeVisualizer::EnvelopeVisualizer(PulsarAudioProcessor& p, Envelope& e) : env(e), audioProcessor(p)
 {
     setSize(400, 150);
 
-    
+
     putValuesInTable();
-    
+
     startTimerHz(60);
-    
-    frame.setBounds(getWidth() * 0.16, getHeight() * 0.03, getWidth() * 0.85, getHeight() * 0.96);
-    reducedFrame.setBounds(frame.getX() + pointSize, frame.getY() + pointSize, frame.getWidth() - (pointSize * 4), frame.getHeight() - (pointSize * 2));
-    
-    auto width = reducedFrame.getWidth();
+
+    frame.setBounds((int) ((float) getWidth() * 0.16f), (int) ((float) getHeight() * 0.03f), (int) ((float) getWidth() * 0.85f), (int) ((float) getHeight() * 0.96f));
+    reducedFrame.setBounds(frame.getX() + (int) pointSize, frame.getY() + (int) pointSize, frame.getWidth() - (int) (pointSize * 4.f), frame.getHeight() - (int) (pointSize * 2.f));
+
     auto height = reducedFrame.getHeight();
-    
+
     /*
      Stationary terminal nodes in the envelope.  Can only be adjusted in their Y axis
      */
     //startPoint.setPosition(frame.getX() + 5, height );
-    
-    startPoint.setCentre(reducedFrame.getX(), height);
+
+    startPoint.setCentre((float) reducedFrame.getX(), (float) height);
     startPoint.setSize(pointSize, pointSize);
-    
-    endPoint.setCentre(reducedFrame.getWidth(), height);
+
+    endPoint.setCentre((float) reducedFrame.getWidth(), (float) height);
     endPoint.setSize(pointSize, pointSize);
-    
-    juce::Font font ("Consolas", "Bold", 20.f);
-    
+
+    juce::Font font (juce::FontOptions ("Consolas", "Bold", 20.f));
+
     nameLabel = std::make_unique<Label>("", name);
     nameLabel->setBounds(0, 0, 150, 25);
     nameLabel->setCentrePosition(getLocalBounds().getCentre());
@@ -47,8 +46,8 @@ EnvelopeVisualizer::EnvelopeVisualizer(PulsarAudioProcessor& p, Envelope& e) : a
     nameLabel->setJustificationType(juce::Justification::centred);
     nameLabel->toBack();
     addAndMakeVisible (nameLabel.get());
-    
-     juce::Font font2 ("Consolas", "Bold", 12.f);
+
+     juce::Font font2 (juce::FontOptions ("Consolas", "Bold", 12.f));
     valueLabel = std::make_unique<Label>("", value);
     valueLabel->setBounds(250, 130, 100, 25);
     valueLabel->setFont(font2);
@@ -120,15 +119,15 @@ void EnvelopeVisualizer::paint (juce::Graphics& g)
     envChange = false;
     
     auto val = 1 - slider->getValue();
-    sliderPath.startNewSubPath(frame.getX(), frame.getHeight() * val);
-    sliderPath.lineTo(getWidth(), frame.getHeight() * val);
+    sliderPath.startNewSubPath((float) frame.getX(), (float) ((float) frame.getHeight() * val));
+    sliderPath.lineTo((float) getWidth(), (float) ((float) frame.getHeight() * val));
     juce::PathStrokeType sliderStroke(1.75f, juce::PathStrokeType::curved);
     g.setColour(juce::Colours::white.withAlpha(0.3f));
     g.strokePath(sliderPath, sliderStroke);
-    
+
     juce::Rectangle<int> testRect;
     testRect.setBounds(0, 0, 20, 20);
-    testRect.setCentre(envPath.getPointAlongPath(300).getX(), envPath.getPointAlongPath(300).getY());
+    testRect.setCentre((int) envPath.getPointAlongPath(300).getX(), (int) envPath.getPointAlongPath(300).getY());
     g.drawRect(testRect);
 
     
@@ -169,7 +168,7 @@ void EnvelopeVisualizer::timerCallback()
     
 }
 
-void EnvelopeVisualizer::setName(juce::String mName)
+void EnvelopeVisualizer::setName(const juce::String& mName)
 {
     nameLabel->setText(mName, dontSendNotification);
     repaint();
@@ -186,8 +185,8 @@ void EnvelopeVisualizer::mouseDown(const MouseEvent& e)
     // check if it is within the component
     if(getLocalBounds().contains(e.x, e.y))
     {
-        mousePosition.setXY(e.x, e.y);
-        lastPosition.setXY(e.x, e.y);
+        mousePosition.setXY((float) e.x, (float) e.y);
+        lastPosition.setXY((float) e.x, (float) e.y);
         
         // check if our cursor is inside one the dots in the vector
         // first the terminal points
@@ -204,7 +203,7 @@ void EnvelopeVisualizer::mouseDown(const MouseEvent& e)
         // look through the array if we aren't grabbing the start or end points
        if (!startPoint.contains(mousePosition) || !endPoint.contains(mousePosition))
        {
-            for (size_t i = 0; i < envPoints.size(); ++i)
+            for (int i = 0; i < envPoints.size(); ++i)
             {
                 auto* point = envPoints[i];
                 if(point->contains(mousePosition))
@@ -228,7 +227,7 @@ void EnvelopeVisualizer::mouseDown(const MouseEvent& e)
     
 }
 
-void EnvelopeVisualizer::mouseUp(const MouseEvent& e)
+void EnvelopeVisualizer::mouseUp([[maybe_unused]] const MouseEvent& e)
 {
     isDraggingPoint = false;
     isDraggingStartPoint = false;
@@ -237,19 +236,19 @@ void EnvelopeVisualizer::mouseUp(const MouseEvent& e)
     putValuesInTable();
 }
 
-void EnvelopeVisualizer::mouseMove(const MouseEvent& e)
+void EnvelopeVisualizer::mouseMove([[maybe_unused]] const MouseEvent& e)
 {
-    
+
 }
 
 void EnvelopeVisualizer::mouseDoubleClick(const MouseEvent& e)
 {
-    if(getLocalBounds().reduced(3.f).contains(e.x, e.y))
+    if(getLocalBounds().reduced(3).contains(e.x, e.y))
     {
-        
-        mousePosition.setXY(e.x, e.y);
+
+        mousePosition.setXY((float) e.x, (float) e.y);
         auto* newPoint = envPoints.add(new EnvelopeControlPoint<float>);
-        newPoint->setPosition(e.x, e.y);
+        newPoint->setPosition((float) e.x, (float) e.y);
         newPoint->setSize(pointSize, pointSize);
         repaint();
         //envChange = true;
@@ -263,27 +262,27 @@ void EnvelopeVisualizer::mouseDrag(const MouseEvent& e)
     if(reducedFrame.contains(e.x, e.y))
     {
         envChange = true;
-        mousePosition.setXY(e.x, e.y);
-        
+        mousePosition.setXY((float) e.x, (float) e.y);
+
 //        auto y = jlimit(5, frame.getHeight(), e.y);
 //        auto x = jlimit(5, frame.getWidth(), e.x);
-        
+
         if (isDraggingStartPoint)
         {
-            startPoint.setCentre(reducedFrame.getX(), e.y);
+            startPoint.setCentre((float) reducedFrame.getX(), (float) e.y);
         }
         else if (isDraggingEndPoint)
         {
-            endPoint.setCentre(reducedFrame.getX() + reducedFrame.getWidth(), e.y);
+            endPoint.setCentre((float) (reducedFrame.getX() + reducedFrame.getWidth()), (float) e.y);
         }
         else if (isDraggingPoint)
         {
 //            selectedPoint->setX(e.x);
 //            selectedPoint->setY(e.y);
-            selectedPoint->setCentre(e.x, e.y);
-            
+            selectedPoint->setCentre((float) e.x, (float) e.y);
+
             // check to make sure no dots have the same x value
-            for(size_t i = 0; i < envPoints.size(); ++i)
+            for(int i = 0; i < envPoints.size(); ++i)
             {
                 auto* point = envPoints[i]; // point we are checking against
                 if (point->containsWithinSection(selectedPoint->getCentre()) && !point->isSelected())
@@ -304,36 +303,35 @@ void EnvelopeVisualizer::putValuesInTable()
     envPoints.add(&endPoint);
     
     int xDelt = 0;
-    for (size_t i = 1; i < envPoints.size(); ++i)
+    for (int i = 1; i < envPoints.size(); ++i)
     {
-        
-        auto height = reducedFrame.getHeight();
-        auto y1 = height - envPoints[i-1]->getCentreY();
-        auto y2 = height - envPoints[i]->getCentreY();
+
+        float height = (float) reducedFrame.getHeight();
+        float y1 = height - envPoints[i-1]->getCentreY();
+        float y2 = height - envPoints[i]->getCentreY();
         float val1 = y1 / height;
         //DBG(val1);
         float val2 = y2 / height;
         //DBG(val2);
         float yDelta = val2 - val1; // change from previous point to current point in y axis scaled 0 - 1
-        
-        auto width = reducedFrame.getWidth();
+
         auto x1 = envPoints[i-1]->getCentre().getX();
-        
+
         auto x2 = envPoints[i]->getCentre().getX();
-        
-        
+
+
         auto envelopeWidth = endPoint.getCentre().getX() - startPoint.getCentre().getX();
         float xDeltaPercent = (x2 - x1) / envelopeWidth; // percent of x axis this section is
-        
+
         float xDeltaSamples = xDeltaPercent * 1024; // same percent applied to the 48000 samples in buffer
         float yDeltaPerSample = yDelta / xDeltaSamples; // how much change in amp 0 - 1 over the section
-        
+
         xDelt += (int) xDeltaSamples;
-        
-        
+
+
         for (int j = 0; j <= (int) xDeltaSamples; ++j)
         {
-            float yValue = val1 + (yDeltaPerSample * j);
+            float yValue = val1 + (yDeltaPerSample * (float) j);
             
             if(y1 < 0.01)
                 yValue = 0;
@@ -370,11 +368,11 @@ void EnvelopeVisualizer::sliderValueChanged(Slider* s)
     
     
     
-    auto height = frame.getHeight();
-    
+    double height = (double) frame.getHeight();
+
     auto change = (currentSliderVal - lastSliderVal) * height;
-    
-    auto y1 = startPoint.getBottom() - change;
+
+    auto y1 = (double) startPoint.getBottom() - change;
 
 
     if (y1 > height - 5)
@@ -382,9 +380,9 @@ void EnvelopeVisualizer::sliderValueChanged(Slider* s)
     if (y1 < 5)
         y1 = 5;
 
-    startPoint.setY(y1);
+    startPoint.setY((float) y1);
 
-    auto y2 = endPoint.getBottom() - change;
+    auto y2 = (double) endPoint.getBottom() - change;
 
 
     if (y2 > height - 5)
@@ -392,20 +390,20 @@ void EnvelopeVisualizer::sliderValueChanged(Slider* s)
     if (y2 < 5)
         y2 = 5;
 
-    endPoint.setY(y2);
-    
-    for (size_t i = 0; i < envPoints.size(); ++i)
+    endPoint.setY((float) y2);
+
+    for (int i = 0; i < envPoints.size(); ++i)
     {
-        auto y3 = envPoints[i]->getY() - change;
+        auto y3 = (double) envPoints[i]->getY() - change;
         //y3 = envPoints[i]->getY() - y3;
-        
+
         if (y3 > height - 5)
             y3 = height - 5;
-        
+
         if (y3 < 5)
             y3 = 5;
-        
-        envPoints[i]->setY(y3);
+
+        envPoints[i]->setY((float) y3);
 
     }
     

@@ -42,7 +42,7 @@ public:
     
     // I think doing this would be a less confusing option rather than put it in the constructor
     // Imagine trying to implement the class and thinking "WTF is going on, why won't it work"?  Setting the name seems more like a feature than a necessity
-    void setName(juce::String mName);
+    void setName(const juce::String& mName) override;
     void setValue();
     
     void sliderValueChanged(Slider* s) override;
@@ -61,7 +61,7 @@ private:
     juce::OwnedArray<EnvelopeControlPoint<float>> envPoints;
     EnvelopeControlPoint<float> startPoint;
     EnvelopeControlPoint<float> endPoint;
-    EnvelopeControlPoint<float>* selectedPoint;
+    EnvelopeControlPoint<float>* selectedPoint = nullptr;
     float pointSize = 3.f;
     juce::Rectangle<int> frame;
     juce::Rectangle<int> reducedFrame;
@@ -82,7 +82,7 @@ private:
     
     bool envChange = false;
     
-    double mSampleRate;
+    double mSampleRate = 0.0;
     double lastSliderVal = 0;
     
     PulsarAudioProcessor& audioProcessor;

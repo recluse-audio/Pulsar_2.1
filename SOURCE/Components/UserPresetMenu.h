@@ -34,7 +34,7 @@ public:
         textInput.setBoundsRelative(0.3, 0.3, 0.4, 0.2);
         textInput.setColour(juce::Label::backgroundColourId, juce::Colours::black);
         textInput.setJustificationType(Justification::centred);
-        textInput.setFont(Font("Consolas", "Regular", 24.f));
+        textInput.setFont(Font(FontOptions("Consolas", "Regular", 24.f)));
     }
 
     ~UserPresetMenu() override
@@ -94,7 +94,7 @@ public:
         textInput.setBoundsRelative(0.3, 0.3, 0.4, 0.2);
         textInput.setColour(juce::Label::backgroundColourId, juce::Colours::black);
         textInput.setJustificationType(Justification::centred);
-        textInput.setFont(Font("Consolas", "Regular", 16.f));
+        textInput.setFont(Font(FontOptions("Consolas", "Regular", 16.f)));
         sendLookAndFeelChange();
     }
 

@@ -43,7 +43,7 @@ PulsarControlsComponent::~PulsarControlsComponent()
 {
 }
 
-void PulsarControlsComponent::paint (juce::Graphics& g)
+void PulsarControlsComponent::paint ([[maybe_unused]] juce::Graphics& g)
 {
 
    // g.fillAll(juce::Colours::transparentBlack.withAlpha(0.f));
@@ -53,20 +53,20 @@ void PulsarControlsComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    runButton->setBoundsRelative(0.05, 0.035, 0.1, 0.05);
-    triggerButton->setBoundsRelative(0.175, 0.035, 0.1, 0.05);
+    runButton->setBoundsRelative(0.05f, 0.035f, 0.1f, 0.05f);
+    triggerButton->setBoundsRelative(0.175f, 0.035f, 0.1f, 0.05f);
 
-    attackSlider->setBoundsRelative(0.32, 0.825, 0.06, 0.125);
-    decaySlider->setBoundsRelative(0.42, 0.825, 0.06, 0.125); 
-    sustainSlider->setBoundsRelative(0.52, 0.825, 0.06, 0.125);
-    releaseSlider->setBoundsRelative(0.62, 0.825, 0.06, 0.125);
+    attackSlider->setBoundsRelative(0.32f, 0.825f, 0.06f, 0.125f);
+    decaySlider->setBoundsRelative(0.42f, 0.825f, 0.06f, 0.125f);
+    sustainSlider->setBoundsRelative(0.52f, 0.825f, 0.06f, 0.125f);
+    releaseSlider->setBoundsRelative(0.62f, 0.825f, 0.06f, 0.125f);
 
-    glideSlider->setBoundsRelative(0.05, 0.85, 0.1, 0.1);
-    widthSlider->setBoundsRelative(0.85, 0.85, 0.1, 0.1);
+    glideSlider->setBoundsRelative(0.05f, 0.85f, 0.1f, 0.1f);
+    widthSlider->setBoundsRelative(0.85f, 0.85f, 0.1f, 0.1f);
 
-    interSlider->setBoundsRelative(0.8, 0.2, 0.035, 0.35);
-    triggerOnSlider->setBoundsRelative(0.85, 0.2, 0.035, 0.35);
-    triggerOffSlider->setBoundsRelative(0.9, 0.2, 0.035, 0.35);
+    interSlider->setBoundsRelative(0.8f, 0.2f, 0.035f, 0.35f);
+    triggerOnSlider->setBoundsRelative(0.85f, 0.2f, 0.035f, 0.35f);
+    triggerOffSlider->setBoundsRelative(0.9f, 0.2f, 0.035f, 0.35f);
 
     //glideSlider->setBounds(455, getHeight() - 77, 40, 55);
     //interSlider->setBounds(496, 80, 10, 160);
@@ -75,7 +75,7 @@ void PulsarControlsComponent::resized()
     //triggerOffSlider->setBounds(470, 80, 22, 160);
 }
 
-void PulsarControlsComponent::buttonClicked(Button* b)
+void PulsarControlsComponent::buttonClicked([[maybe_unused]] Button* b)
 {
 
 }

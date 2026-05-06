@@ -22,30 +22,29 @@ class OwnedPulsaret : public Pulsaret
 {
 public:
     OwnedPulsaret();
-    ~OwnedPulsaret();
-    
-    void prepare(double mSampleRate);
+    ~OwnedPulsaret() override;
+
+    void prepare(double sampleRate);
     void setFrequency (float frequency);
-    void calculateDeltas(float freq);
-    
+    void calculateDeltas(float frequency);
+
     void setRunning() override;
-    
-    float getNextSample() noexcept;
-    
+
+    float getNextSample() noexcept override;
+
     void resetPhase() override;
 
     void setLengthInSamples(float numSamples);
 
     void setContinuous(bool test);
-    void setAsHit(); 
+    void setAsHit();
     void setAsMiss();
-    
+
     void setWaveType(float wave);
-    
+
     juce::AudioBuffer<float>& getEnv();
 
     PulsaretTable& getPulsaretTable();
-    PulsaretTable pulsaretTable;
 
     Table& getTable();
     Table table;
@@ -53,22 +52,13 @@ public:
     bool checkIfFree();
     void setPulsaretStatus(bool pulsaretStatus);
 private:
-    float freq;
+    float freq = 0.f;
     bool trigger = true; // affected by formFreq
-    bool isFree = true;
 
-    double mSampleRate = 0;
     Envelope env;
 
-    int pulsarPeriodInSamples;
-    float currentIndex = 0.0f;
-    float tableDelta = 0.0f;
     float cycleSamples = 1;
-    float cycleSamplesLeft = 1;
 
     int cycles = 1;
     int numCycles = 1;
-    
-    int tableSize = 2048;
-   
 };

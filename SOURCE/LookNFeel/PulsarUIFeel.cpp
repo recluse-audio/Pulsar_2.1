@@ -47,15 +47,15 @@ void PulsarUIFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width,
     if(slider.getSliderStyle() == juce::Slider::SliderStyle::LinearBarVertical)
     {
         
-        juce::Rectangle<float> bgFrame(x, y, width, height);
+        juce::Rectangle<float> bgFrame((float) x, (float) y, (float) width, (float) height);
         g.setColour(juce::Colours::blanchedalmond);
         g.drawRoundedRectangle(bgFrame, 5.f, 2.f);
 
         g.setColour(juce::Colours::transparentBlack.withAlpha(0.f));
         g.fillAll();
 
-       
-        juce::Rectangle<float> centerRect(x, sliderPos, width, 2);
+
+        juce::Rectangle<float> centerRect((float) x, sliderPos, (float) width, 2.f);
         g.setColour(juce::Colours::orange);
         g.fillRoundedRectangle(centerRect, 1.f);
 
@@ -64,7 +64,7 @@ void PulsarUIFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width,
     if (slider.getSliderStyle() == juce::Slider::SliderStyle::LinearBar)
     {
 
-        juce::Rectangle<float> bgFrame(x, y, width, height);
+        juce::Rectangle<float> bgFrame((float) x, (float) y, (float) width, (float) height);
         g.setColour(juce::Colours::blanchedalmond);
         g.drawRoundedRectangle(bgFrame, 5.f, 2.f);
 
@@ -72,7 +72,7 @@ void PulsarUIFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width,
         g.fillAll();
 
 
-        juce::Rectangle<float> centerRect(x, sliderPos, width, 2);
+        juce::Rectangle<float> centerRect((float) x, sliderPos, (float) width, 2.f);
         g.setColour(juce::Colours::orange);
         g.fillRoundedRectangle(centerRect, 1.f);
 
@@ -92,10 +92,10 @@ void PulsarUIFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width,
         
         
         auto pos = sliderPos;
-        if (pos >= height - 3)
-            pos = height - 3;
-        
-        juce::Rectangle<int> thumb(0, pos, width, 2);
+        if (pos >= (float) height - 3.f)
+            pos = (float) height - 3.f;
+
+        juce::Rectangle<int> thumb(0, (int) pos, width, 2);
         g.setColour(juce::Colours::yellow);
         g.fillRoundedRectangle(thumb.toFloat(), 5.f);
         
@@ -120,10 +120,10 @@ void PulsarUIFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width,
         g.fillAll();
         
         auto pos = sliderPos;
-        if (pos >= width - 3)
-            pos = width - 3;
-        
-        juce::Rectangle<int> thumb(pos, 0, 2, 20);
+        if (pos >= (float) width - 3.f)
+            pos = (float) width - 3.f;
+
+        juce::Rectangle<int> thumb((int) pos, 0, 2, 20);
         g.setColour(juce::Colours::orange);
         g.fillRoundedRectangle(thumb.toFloat(), 2.f);
         
@@ -133,31 +133,31 @@ void PulsarUIFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width,
     
     if(slider.getSliderStyle() == Slider::ThreeValueVertical)
     {
-        juce::Rectangle<float> bgFrame(x, y, width, height);
+        juce::Rectangle<float> bgFrame((float) x, (float) y, (float) width, (float) height);
         g.setColour(juce::Colours::blanchedalmond);
         g.drawRoundedRectangle(bgFrame, 5.f, 2.f);
-        
-        float h = jlimit<float>(1, height, minSliderPos - maxSliderPos);
-        float y = jlimit<float>(2, height - 2, maxSliderPos);
-        juce::Rectangle<float> fillRect(x, y, width, h);
+
+        float h = jlimit<float>(1.f, (float) height, minSliderPos - maxSliderPos);
+        float fillY = jlimit<float>(2.f, (float) height - 2.f, maxSliderPos);
+        juce::Rectangle<float> fillRect((float) x, fillY, (float) width, h);
 
         auto color = slider.findColour(Slider::backgroundColourId);
-        juce::ColourGradient gradient(color.darker(), width / 2, height, color.withHue(0.5f), width / 2, 0, false);
+        juce::ColourGradient gradient(color.darker(), (float) width / 2.f, (float) height, color.withHue(0.5f), (float) width / 2.f, 0.f, false);
 
         g.setGradientFill(gradient);
         g.fillRect(fillRect);
     }
-    
+
     if(slider.getSliderStyle() == Slider::ThreeValueHorizontal)
     {
-        juce::Rectangle<float> bgFrame(x, y, width, height);
+        juce::Rectangle<float> bgFrame((float) x, (float) y, (float) width, (float) height);
         g.setColour(juce::Colours::blanchedalmond);
         g.drawRoundedRectangle(bgFrame, 2.f, 2.f);
-        
-        juce::Rectangle<float> fillRect(minSliderPos + 2, y, maxSliderPos-minSliderPos, height);
+
+        juce::Rectangle<float> fillRect(minSliderPos + 2.f, (float) y, maxSliderPos - minSliderPos, (float) height);
 
         auto color = slider.findColour(Slider::backgroundColourId);
-        juce::ColourGradient gradient(color.darker(), 0, height/2, color.withHue(0.5f), width, height/2, false);
+        juce::ColourGradient gradient(color.darker(), 0.f, (float) height / 2.f, color.withHue(0.5f), (float) width, (float) height / 2.f, false);
         g.setGradientFill(gradient);
         g.fillRect(fillRect);
     }
@@ -173,9 +173,9 @@ void PulsarUIFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width,
 void PulsarUIFeel::drawRotarySlider(Graphics& g, int x, int y, int width, int height, 
     float sliderPos, float rotaryStartAngle, float rotaryEndAngle, Slider& slider)
 {
-    auto radius = jmin<float>(width / 2.f, height / 2.1f);
-    auto centreX = x + width * 0.5f;
-    auto centreY = y + height * 0.55f;
+    auto radius = jmin<float>((float) width / 2.f, (float) height / 2.1f);
+    auto centreX = (float) x + (float) width * 0.5f;
+    auto centreY = (float) y + (float) height * 0.55f;
     auto rx = centreX - radius;
     auto ry = centreY - radius;
     auto rw = radius * 2.0f;
@@ -195,7 +195,7 @@ void PulsarUIFeel::drawRotarySlider(Graphics& g, int x, int y, int width, int he
     g.setColour(juce::Colours::blanchedalmond.withAlpha(0.3f));
     g.drawRect(slider.getLocalBounds(), 2.f);
 
-    auto lineThickness = jmin(15.0f, jmin(width, height) * 0.45f) * 0.1f;
+    auto lineThickness = jmin(15.0f, (float) jmin(width, height) * 0.45f) * 0.1f;
 
     
     g.setColour(juce::Colours::blanchedalmond);
@@ -222,7 +222,7 @@ juce::Slider::SliderLayout PulsarUIFeel::getSliderLayout(juce::Slider& slider)
 
     if (slider.getSliderStyle() == Slider::SliderStyle::LinearBarVertical)
     {
-        juce::Rectangle<int> textBox(0, height * 0.7, bounds.getWidth(), 15);
+        juce::Rectangle<int> textBox(0, (int) (height * 0.7), bounds.getWidth(), 15);
         layout.textBoxBounds = textBox;
     }
     
@@ -231,8 +231,8 @@ juce::Slider::SliderLayout PulsarUIFeel::getSliderLayout(juce::Slider& slider)
         juce::Rectangle<int> altBox;
         juce::Rectangle<int> sliderBox;
 
-        sliderBox.setBounds(0, 0, bounds.getWidth(), height * 0.5f);
-        altBox.setBounds(0, height * 0.5f, bounds.getWidth(), height * 0.5f);
+        sliderBox.setBounds(0, 0, bounds.getWidth(), (int) ((float) height * 0.5f));
+        altBox.setBounds(0, (int) ((float) height * 0.5f), bounds.getWidth(), (int) ((float) height * 0.5f));
         layout.textBoxBounds = altBox;
         layout.sliderBounds = sliderBox;
     }
@@ -257,14 +257,14 @@ juce::Label* PulsarUIFeel::createSliderTextBox(juce::Slider& slider)
 
 /*=================================== FONT =========================================*/
 
-juce::Font PulsarUIFeel::getLabelFont(juce::Label& label)
+juce::Font PulsarUIFeel::getLabelFont([[maybe_unused]] juce::Label& label)
 {
    return getFont();
-    
+
 }
 
-void PulsarUIFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button, const juce::Colour& backgroundColour,
-                                    bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+void PulsarUIFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button, [[maybe_unused]] const juce::Colour& backgroundColour,
+                                    bool shouldDrawButtonAsHighlighted, [[maybe_unused]] bool shouldDrawButtonAsDown)
 {
     juce::Rectangle<int> bounds = button.getLocalBounds();
     
@@ -297,7 +297,7 @@ void PulsarUIFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
 void PulsarUIFeel::drawPopupMenuBackground(juce::Graphics& g, int width, int height)
 {   
     g.setColour(juce::Colours::white);
-    g.drawRoundedRectangle(0, 0, width, height, 5.f, 2.f);
+    g.drawRoundedRectangle(0.f, 0.f, (float) width, (float) height, 5.f, 2.f);
 
     g.setColour(juce::Colours::black);
     g.fillAll();
