@@ -150,16 +150,16 @@ jobs:
 
       - name: Smoke-test sign (Pulsar.exe)
         shell: pwsh
-        env:
-          AZURE_LOG_LEVEL: verbose
         run: |
-          Write-Host "metadata.json:"
-          Get-Content (Join-Path $HOME ".azure\metadata.json")
+          $meta = Get-Content (Join-Path $HOME ".azure\metadata.json") | ConvertFrom-Json
+          Write-Host "metadata.json field lengths (values masked):"
+          Write-Host "  Endpoint:               $($meta.Endpoint.Length) chars, ends with '/' = $($meta.Endpoint.EndsWith('/'))"
+          Write-Host "  CodeSigningAccountName: $($meta.CodeSigningAccountName.Length) chars"
+          Write-Host "  CertificateProfileName: $($meta.CertificateProfileName.Length) chars"
           Write-Host ""
 
-          Write-Host "Cert profiles in account (Azure-side names, exact case):"
-          $accountId = (Get-Content (Join-Path $HOME ".azure\metadata.json") | ConvertFrom-Json).CodeSigningAccountName
-          az resource list --resource-type "Microsoft.CodeSigning/codeSigningAccounts/certificateProfiles" -o table
+          Write-Host "Cert profiles in account (raw JSON — names get masked if they match secrets):"
+          az resource list --resource-type "Microsoft.CodeSigning/codeSigningAccounts/certificateProfiles" -o json
           Write-Host ""
 
           $exe = "BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.exe"
