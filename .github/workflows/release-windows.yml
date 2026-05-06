@@ -40,10 +40,25 @@ jobs:
       - name: Install Azure Trusted Signing Client Tools
         shell: pwsh
         run: |
-          winget install -e --id Microsoft.Azure.TrustedSigningClientTools `
-            --accept-source-agreements --accept-package-agreements `
-            --disable-interactivity --silent
-          if ($LASTEXITCODE -ne 0) { throw "winget install failed (exit $LASTEXITCODE)." }
+          # NuGet pull is more reliable than winget on hosted runners.
+          # Land the dlib at the same LOCALAPPDATA path the local dev setup uses,
+          # so SIGNED/PC/sign_pc_*.py finds it without any env override.
+          $dest = Join-Path $env:LOCALAPPDATA "Microsoft\MicrosoftArtifactSigningClientTools"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+
+          $work = Join-Path $env:RUNNER_TEMP "tsc"
+          New-Item -ItemType Directory -Force -Path $work | Out-Null
+          nuget install Microsoft.Trusted.Signing.Client -OutputDirectory $work -ExcludeVersion -NonInteractive
+          if ($LASTEXITCODE -ne 0) { throw "nuget install failed (exit $LASTEXITCODE)." }
+
+          $dll = Get-ChildItem -Path $work -Recurse -Filter "Azure.CodeSigning.Dlib.dll" -ErrorAction SilentlyContinue |
+                 Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $dll) { throw "Azure.CodeSigning.Dlib.dll not found in NuGet package." }
+
+          # Copy entire bin folder (dll has native + managed deps next to it).
+          $binDir = $dll.Directory.FullName
+          Copy-Item -Path (Join-Path $binDir "*") -Destination $dest -Recurse -Force
+          Write-Host "Copied dlib payload from $binDir to $dest"
 
       - name: Verify signing toolchain
         shell: pwsh
