@@ -1,8 +1,10 @@
 name: Release Windows (sign + package)
 
-# Phase 1: skeleton. Builds Release VST3 + Standalone on a windows-latest
-# runner and uploads the unsigned artifacts. No signing yet — that lands in
-# Phase 3+. See .claude/github-pc-signing-plan.md for the full phased plan.
+# Phase 2: skeleton + signing toolchain provisioned. Builds Release VST3 +
+# Standalone on a windows-latest runner, installs Inno Setup and the Azure
+# Trusted Signing Client Tools, and verifies signtool + the dlib are
+# reachable. No signing yet — that lands in Phase 3+.
+# See .claude/github-pc-signing-plan.md for the full phased plan.
 
 on:
   workflow_dispatch:
@@ -19,6 +21,49 @@ jobs:
 
       - name: Install CMake
         uses: lukka/get-cmake@latest
+
+      - name: Install Inno Setup 6
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          $iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) {
+            $candidate = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+            if (Test-Path $candidate) {
+              $iscc = $candidate
+              "$([System.IO.Path]::GetDirectoryName($candidate))" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+            }
+          }
+          if (-not $iscc) { throw "iscc.exe not found after install." }
+          Write-Host "OK: iscc at $iscc"
+
+      - name: Install Azure Trusted Signing Client Tools
+        shell: pwsh
+        run: |
+          winget install -e --id Microsoft.Azure.TrustedSigningClientTools `
+            --accept-source-agreements --accept-package-agreements `
+            --disable-interactivity --silent
+          if ($LASTEXITCODE -ne 0) { throw "winget install failed (exit $LASTEXITCODE)." }
+
+      - name: Verify signing toolchain
+        shell: pwsh
+        run: |
+          $signtool = (Get-Command signtool.exe -ErrorAction SilentlyContinue).Source
+          if (-not $signtool) {
+            $candidates = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
+                          Where-Object { $_.FullName -like "*\x64\signtool.exe" } |
+                          Sort-Object FullName -Descending
+            if ($candidates) {
+              $signtool = $candidates[0].FullName
+              "$([System.IO.Path]::GetDirectoryName($signtool))" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+            }
+          }
+          if (-not $signtool) { throw "signtool.exe not found." }
+          Write-Host "OK: signtool at $signtool"
+
+          $dlib = Join-Path $env:LOCALAPPDATA "Microsoft\MicrosoftArtifactSigningClientTools\Azure.CodeSigning.Dlib.dll"
+          if (-not (Test-Path $dlib)) { throw "Azure.CodeSigning.Dlib.dll not found at $dlib" }
+          Write-Host "OK: dlib at $dlib"
 
       - name: Read version
         id: version
