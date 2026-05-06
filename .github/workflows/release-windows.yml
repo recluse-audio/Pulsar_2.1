@@ -150,7 +150,18 @@ jobs:
 
       - name: Smoke-test sign (Pulsar.exe)
         shell: pwsh
+        env:
+          AZURE_LOG_LEVEL: verbose
         run: |
+          Write-Host "metadata.json:"
+          Get-Content (Join-Path $HOME ".azure\metadata.json")
+          Write-Host ""
+
+          Write-Host "Cert profiles in account (Azure-side names, exact case):"
+          $accountId = (Get-Content (Join-Path $HOME ".azure\metadata.json") | ConvertFrom-Json).CodeSigningAccountName
+          az resource list --resource-type "Microsoft.CodeSigning/codeSigningAccounts/certificateProfiles" -o table
+          Write-Host ""
+
           $exe = "BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.exe"
           $smokeCopy = Join-Path $env:RUNNER_TEMP "Pulsar.smoke.exe"
           Copy-Item $exe $smokeCopy -Force
