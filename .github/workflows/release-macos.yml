@@ -1,8 +1,9 @@
 name: Release macOS (sign + notarize)
 
-# Phase 3: keychain provisioning + notary profile registration. Sets up the
-# `notary-profile` that SIGNED/MAC/notarize_mac.py expects to exist.
-# Still does NOT actually sign or notarize — Phase 4 wires that in.
+# Phase 4: end-to-end signed + notarized + stapled .pkg. The runner provisions
+# certs and a notary profile in a temp keychain, builds universal Release,
+# then runs SIGNED/release_workflow_mac.py to sign, build the pkg, sign the
+# pkg, notarize, and staple. Output is uploaded as RELEASE/MAC/<version>/.
 # See .claude/github-mac-signing-plan.md for the full phased plan.
 
 on:
@@ -122,21 +123,22 @@ jobs:
           lipo -info "$ART/AU/Pulsar.component/Contents/MacOS/Pulsar"
           lipo -info "$ART/Standalone/Pulsar.app/Contents/MacOS/Pulsar"
 
-      - name: Package unsigned bundles
-        run: |
-          ART="BUILD/Pulsar_artefacts/Release"
-          ditto -c -k --sequesterRsrc --keepParent "$ART/VST3/Pulsar.vst3"        Pulsar-macOS-VST3-unsigned.zip
-          ditto -c -k --sequesterRsrc --keepParent "$ART/AU/Pulsar.component"     Pulsar-macOS-AU-unsigned.zip
-          ditto -c -k --sequesterRsrc --keepParent "$ART/Standalone/Pulsar.app"   Pulsar-macOS-Standalone-unsigned.zip
+      - name: Sign, build installer, notarize, staple
+        run: python SIGNED/release_workflow_mac.py
 
-      - name: Upload unsigned bundles
+      - name: Verify final pkg is notarized and stapled
+        run: |
+          set -e
+          PKG=$(ls "RELEASE/MAC/${{ steps.version.outputs.version }}"/Pulsar_v*_macOS_Installer.pkg)
+          echo "Validating: $PKG"
+          xcrun stapler validate "$PKG"
+          spctl -a -vvv -t install "$PKG" || true   # informational; spctl on installer pkgs can be noisy
+
+      - name: Upload signed release
         uses: actions/upload-artifact@v4
         with:
-          name: Pulsar-macOS-${{ steps.version.outputs.version }}-unsigned
-          path: |
-            Pulsar-macOS-VST3-unsigned.zip
-            Pulsar-macOS-AU-unsigned.zip
-            Pulsar-macOS-Standalone-unsigned.zip
+          name: Pulsar-macOS-${{ steps.version.outputs.version }}
+          path: RELEASE/MAC/${{ steps.version.outputs.version }}/
 
       - name: Tear down signing keychain
         if: always()
