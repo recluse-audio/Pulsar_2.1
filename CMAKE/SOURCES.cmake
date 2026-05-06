@@ -5,6 +5,8 @@ set(SOURCES
     SOURCE/Components/EnvelopeVisualizer.h
     SOURCE/Components/PluginEditor.cpp
     SOURCE/Components/PluginEditor.h
+    SOURCE/Components/PluginMainView.cpp
+    SOURCE/Components/PluginMainView.h
     SOURCE/Components/PresetManagerView.h
     SOURCE/Components/PulsarControlsComponent.cpp
     SOURCE/Components/PulsarControlsComponent.h

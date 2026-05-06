@@ -51,28 +51,20 @@ void PulsarControlsComponent::paint ([[maybe_unused]] juce::Graphics& g)
 
 void PulsarControlsComponent::resized()
 {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
-    runButton->setBoundsRelative(0.05f, 0.035f, 0.1f, 0.05f);
-    triggerButton->setBoundsRelative(0.175f, 0.035f, 0.1f, 0.05f);
+    runButton    ->setBounds( 30, 16, 60, 23);
+    triggerButton->setBounds(105, 16, 60, 23);
 
-    attackSlider->setBoundsRelative(0.32f, 0.825f, 0.06f, 0.125f);
-    decaySlider->setBoundsRelative(0.42f, 0.825f, 0.06f, 0.125f);
-    sustainSlider->setBoundsRelative(0.52f, 0.825f, 0.06f, 0.125f);
-    releaseSlider->setBoundsRelative(0.62f, 0.825f, 0.06f, 0.125f);
+    attackSlider ->setBounds(192, 371, 36, 56);
+    decaySlider  ->setBounds(252, 371, 36, 56);
+    sustainSlider->setBounds(312, 371, 36, 56);
+    releaseSlider->setBounds(372, 371, 36, 56);
 
-    glideSlider->setBoundsRelative(0.05f, 0.85f, 0.1f, 0.1f);
-    widthSlider->setBoundsRelative(0.85f, 0.85f, 0.1f, 0.1f);
+    glideSlider->setBounds( 30, 383, 60, 45);
+    widthSlider->setBounds(510, 383, 60, 45);
 
-    interSlider->setBoundsRelative(0.8f, 0.2f, 0.035f, 0.35f);
-    triggerOnSlider->setBoundsRelative(0.85f, 0.2f, 0.035f, 0.35f);
-    triggerOffSlider->setBoundsRelative(0.9f, 0.2f, 0.035f, 0.35f);
-
-    //glideSlider->setBounds(455, getHeight() - 77, 40, 55);
-    //interSlider->setBounds(496, 80, 10, 160);
-    //widthSlider->setBounds(35, getHeight() - 77, 40, 55);
-    //triggerOnSlider->setBounds(447, 80, 22, 160);
-    //triggerOffSlider->setBounds(470, 80, 22, 160);
+    interSlider     ->setBounds(480, 90, 21, 158);
+    triggerOnSlider ->setBounds(510, 90, 21, 158);
+    triggerOffSlider->setBounds(540, 90, 21, 158);
 }
 
 void PulsarControlsComponent::buttonClicked([[maybe_unused]] Button* b)
