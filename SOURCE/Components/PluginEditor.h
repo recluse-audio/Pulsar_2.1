@@ -92,12 +92,6 @@ private:
 
     PulsaretVisualizer  pulsaretVisualizer;
 
-    bool flashState = false;
-    float alphaSkew = 0.f;
-    float low = 0.f;
-    float high = 0.f;
-    float center = 0.f;
-    
     juce::Rectangle<int> frame;
     Component frameComponent;
     
