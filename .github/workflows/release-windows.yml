@@ -1,0 +1,57 @@
+name: Release Windows (sign + package)
+
+# Phase 1: skeleton. Builds Release VST3 + Standalone on a windows-latest
+# runner and uploads the unsigned artifacts. No signing yet — that lands in
+# Phase 3+. See .claude/github-pc-signing-plan.md for the full phased plan.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION.txt).Trim()
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "VERSION.txt = $version"
+
+      - name: Configure
+        run: cmake -S . -B BUILD -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build All (Release)
+        run: cmake --build BUILD --target Pulsar_All --config Release
+
+      - name: Verify build outputs
+        shell: pwsh
+        run: |
+          $art = "BUILD/Pulsar_artefacts/Release"
+          $vst3 = "$art/VST3/Pulsar.vst3/Contents/x86_64-win/Pulsar.vst3"
+          $exe  = "$art/Standalone/Pulsar.exe"
+          if (-not (Test-Path $vst3)) { throw "VST3 not found: $vst3" }
+          if (-not (Test-Path $exe))  { throw "Standalone not found: $exe" }
+          Write-Host "OK: VST3 + Standalone present."
+
+      - name: Upload unsigned VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pulsar-Windows-VST3-${{ steps.version.outputs.version }}-unsigned
+          path: BUILD/Pulsar_artefacts/Release/VST3/Pulsar.vst3
+
+      - name: Upload unsigned Standalone
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pulsar-Windows-Standalone-${{ steps.version.outputs.version }}-unsigned
+          path: BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.exe
