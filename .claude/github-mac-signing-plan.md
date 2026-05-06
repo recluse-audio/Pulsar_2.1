@@ -1,11 +1,20 @@
 # GitHub Actions: Mac Sign + Notarize Workflow
 
+**Status: SHIPPED.** End-to-end working as of 2026-05-06. Phases 1–4 complete;
+Phase 5 (polish) optional. See `.github/workflows/release-macos.yml` for the
+final implementation.
+
+For replicating this setup in *another* repo, see
+`setup-mac-signing-for-new-project.md` in this directory.
+
+---
+
 A plan for adding a remote (GitHub-hosted) build that signs, notarizes, and
 staples the macOS release `.pkg`, mirroring what `SIGNED/release_workflow_mac.py`
 does on a developer's laptop today.
 
-We work in **small, measurable chunks**. Each phase has a clear "done when..."
-gate so we can stop, run something, and confirm it works before moving on.
+We worked in **small, measurable chunks**. Each phase had a clear "done when..."
+gate so we could stop, run something, and confirm it worked before moving on.
 
 ---
 
@@ -110,7 +119,7 @@ not run the workflow until all seven exist.**
 Each phase is small enough to verify on its own. Don't move to the next phase
 until the current one's "done when" is green.
 
-### Phase 1 — Skeleton workflow that builds (no signing)
+### Phase 1 — Skeleton workflow that builds (no signing) ✅
 
 **Goal:** get a `release-macos.yml` that compiles a universal Release build on
 a macos-14 runner. No secrets, no signing yet. This proves the runner setup
@@ -129,7 +138,7 @@ works.
 zip contains a universal `.vst3`, `.component`, `.app`. (We can verify with
 `lipo -info` locally on a downloaded artifact.)
 
-### Phase 2 — Add temp keychain + import certs
+### Phase 2 — Add temp keychain + import certs ✅
 
 **Goal:** prove we can land both p12s on the runner without leaking them.
 
@@ -154,7 +163,7 @@ zip contains a universal `.vst3`, `.component`, `.app`. (We can verify with
 **Done when:** the diagnostic step in the workflow log shows
 `Developer ID Application: ...` AND `Developer ID Installer: ...`.
 
-### Phase 3 — Register notary profile
+### Phase 3 — Register notary profile ✅
 
 **Goal:** notarytool can submit without prompts.
 
@@ -174,7 +183,17 @@ zip contains a universal `.vst3`, `.component`, `.app`. (We can verify with
 **Done when:** the step exits 0. (No further verification at this stage —
 real verification happens in Phase 4 when we actually submit something.)
 
-### Phase 4 — Wire in `release_workflow_mac.py`
+### Phase 4 — Wire in `release_workflow_mac.py` ✅
+
+> **Gotcha discovered during this phase:** `HELPER_SCRIPTS/update_version.py`
+> previously incremented `VERSION.txt` on every build via the
+> `update_version_header` CMake target. That created a 1-version skew between
+> the bundle's `CFBundleShortVersionString` (locked at configure-time project
+> version) and `VERSION.txt` (mutated post-build), which `release_workflow_mac.py`
+> step 1 correctly flagged. Fix: rewrote `update_version.py` to be pure
+> (read VERSION.txt → write Version.h, no mutation). Bumping is now an
+> explicit, deliberate edit. Carries forward to other projects — see the
+> setup guide.
 
 **Goal:** end-to-end signed + notarized + stapled `.pkg`.
 
@@ -211,13 +230,9 @@ Only once Phase 4 is solid:
 
 ---
 
-## Open questions / things to confirm before Phase 1
+## Resolved decisions
 
-1. **Confirm secrets path:** can you generate the seven secrets and add them
-   to the repo before we start Phase 2? (Phase 1 needs none.)
-2. **Universal binary OK?** Plan assumes yes (see "Universal binary decision"
-   above). Say so if you'd rather ship per-arch.
-3. **Trigger:** start with `workflow_dispatch` only, right? (No automatic
-   release on tag push yet.)
-
-Once those are answered, we start Phase 1.
+1. ✅ Universal binary (`arm64;x86_64`) — confirmed.
+2. ✅ Trigger: `workflow_dispatch` only.
+3. ✅ Secret name `APPLE_NOTARYTOOL_PASSWORD` (renamed from `APPLE_APP_PASSWORD`
+   for clarity about its purpose).
