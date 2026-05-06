@@ -212,12 +212,12 @@ juce::AudioProcessorEditor* PulsarAudioProcessor::createEditor()
 
 void PulsarAudioProcessor::savePreset(const juce::String& presetPath)
 {
-    MemoryBlock block;
-    auto file = juce::File(presetPath);
-    getStateInformation(block); // copies xml state to this 'block' a binary blob
-    file.replaceWithData(block.getData(), block.getSize());
+    juce::File file(presetPath);
+    file.getParentDirectory().createDirectory();
 
-    // need to call getStateInformation(MemoryBlock& destData) and somehow associate the presetPath with teh memory block
+    auto xml = apvts.copyState().createXml();
+    if (xml != nullptr)
+        xml->writeTo(file);
 }
 
 //==============================================================================
@@ -231,12 +231,16 @@ void PulsarAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 
 void PulsarAudioProcessor::loadPreset(const juce::String& presetPathName)
 {
-    // want to call setStateInformation(const void* data, int sizeInBytes)
-    // file to memory block?
-    MemoryBlock block;
-    auto file = juce::File(presetPathName);
-    file.loadFileAsData(block); // fills block with files data.  See setStateInformation() in Audio Processor Base class
-    setStateInformation(block.getData(), (int)block.getSize());
+    juce::File file(presetPathName);
+    if (! file.existsAsFile())
+        return;
+
+    if (auto xml = juce::XmlDocument::parse(file))
+    {
+        auto tree = juce::ValueTree::fromXml(*xml);
+        if (tree.isValid())
+            apvts.replaceState(tree);
+    }
 }
 
 void PulsarAudioProcessor::setStateInformation (const void* data, int sizeInBytes)

@@ -25,51 +25,63 @@ PulsarAudioProcessorEditor::PulsarAudioProcessorEditor (PulsarAudioProcessor& p)
     resetSliders();
     init();
 
-    // menuBar.reset(new MenuBarComponent(this));
-    // addAndMakeVisible(menuBar.get());
+    presetButton = std::make_unique<juce::TextButton>("PRESETS");
+    addAndMakeVisible(presetButton.get());
+    presetButton->setColour(juce::TextButton::buttonColourId, juce::Colours::black);
+    presetButton->setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+    presetButton->setAlwaysOnTop(true);
+    presetButton->onClick = [this]
+    {
+        presetManagerView->refresh();
+        presetManagerView->setVisible(true);
+        presetManagerView->toFront(true);
+    };
 
-    // setApplicationCommandManagerToWatch(&commandManager);
-    // commandManager.registerAllCommandsForTarget(this);
+    savePresetButton = std::make_unique<juce::TextButton>("SAVE AS PRESET");
+    addAndMakeVisible(savePresetButton.get());
+    savePresetButton->setColour(juce::TextButton::buttonColourId, juce::Colours::black);
+    savePresetButton->setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+    savePresetButton->setAlwaysOnTop(true);
+    savePresetButton->onClick = [this]
+    {
+        createPresetView->setVisible(true);
+        createPresetView->toFront(true);
+    };
 
-    // addKeyListener(commandManager.getKeyMappings());
+    presetManagerView = std::make_unique<PresetManagerView>(audioProcessor);
+    addChildComponent(presetManagerView.get());
+    presetManagerView->setAlwaysOnTop(true);
 
-    // addChildComponent(menuHeader);
+    createPresetView = std::make_unique<CreatePresetView>(audioProcessor);
+    addChildComponent(createPresetView.get());
+    createPresetView->setAlwaysOnTop(true);
+    createPresetView->onSaved = [this] { presetManagerView->refresh(); };
 
-    // commandRunner = std::make_unique<CommandRunnerComponent>(audioProcessor);
-    // commandRunner->setBounds(frame);
-
-    // addChildComponent(commandRunner.get());
-    // addAndMakeVisible(burgerMenu);
-    // addAndMakeVisible(sidePanel);
-
-    // burgerMenu.setModel(this);
-    // setBurgerMenuPosition();
+    resized();
 
     setWantsKeyboardFocus(true);
-
     startTimerHz(120);
-
 }
 
 PulsarAudioProcessorEditor::~PulsarAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
 }
 
 void PulsarAudioProcessorEditor::init()
 {
-    nameLabel = std::make_unique<Label>("", "P U L S A R");
+    nameLabel = std::make_unique<juce::Label>("", "P U L S A R");
     addAndMakeVisible(nameLabel.get());
     nameLabel->setBoundsRelative(0.4f, 0.f, 0.3f, 0.1f);
-    nameLabel->setFont(Font(FontOptions("Consolas", "Regular", 20.f)));
+    nameLabel->setFont(juce::Font(juce::FontOptions("Consolas", "Regular", 20.f)));
     nameLabel->setLookAndFeel(&nameFeel);
     nameLabel->setColour(juce::Label::textColourId, juce::Colours::white);
 
-    versionLabel = std::make_unique<Label>("", "v" BUILD_VERSION_STRING);
+    versionLabel = std::make_unique<juce::Label>("", "v" BUILD_VERSION_STRING);
     addAndMakeVisible(versionLabel.get());
     versionLabel->setBoundsRelative(0.4f, 0.08f, 0.3f, 0.05f);
-    versionLabel->setFont(Font(FontOptions("Consolas", "Regular", 10.f)));
+    versionLabel->setFont(juce::Font(juce::FontOptions("Consolas", "Regular", 10.f)));
     versionLabel->setColour(juce::Label::textColourId, juce::Colours::grey);
-
 }
 
 void PulsarAudioProcessorEditor::resetSliders()
@@ -123,38 +135,39 @@ void PulsarAudioProcessorEditor::resetSliders()
     panSlider->setBoundsRelative(0.25f, 0.625f, 0.55f, 0.13f);
     panSlider->attachToState(audioProcessor.apvts,
         kPanID, kPanSpreadID, kPanRandomID);
-
-
-
 }
 
 //==============================================================================
 void PulsarAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    //g.setColour(juce::Colours::black);
     g.setColour(color);
     g.fillAll();
-    
-    
+
     g.setColour(juce::Colours::yellow);
-    //juce::Rectangle<int> frame(15, 50, getWidth() - 30, getHeight() - 65);  // 25px from sides, 30 from top, 5 below nameLabel, 5 above bottom
     g.drawRoundedRectangle(frame.toFloat(), 5.f, 2.f);
-    
+
     g.setColour(juce::Colours::black);
-    g.drawRoundedRectangle(getLocalBounds().reduced(5).toFloat(), 5.f, 2.f);  
+    g.drawRoundedRectangle(getLocalBounds().reduced(5).toFloat(), 5.f, 2.f);
 }
 
 void PulsarAudioProcessorEditor::resized()
 {
-    // menuHeader.setBounds(540, 12, 30, 30);
+    if (savePresetButton != nullptr)
+        savePresetButton->setBounds(getWidth() - 250, 15, 130, 24);
+
+    if (presetButton != nullptr)
+        presetButton->setBounds(getWidth() - 110, 15, 90, 24);
+
+    if (presetManagerView != nullptr)
+        presetManagerView->setBounds(getLocalBounds());
+
+    if (createPresetView != nullptr)
+        createPresetView->setBounds(getLocalBounds());
 }
-
-
 
 void PulsarAudioProcessorEditor::repaintPulsaret()
 {
-
-    if(audioProcessor.isFlashing() && audioProcessor.isTrainRunning())
+    if (audioProcessor.isFlashing() && audioProcessor.isTrainRunning())
     {
         pulsaretVisualizer.setNewWaveColour(juce::Colours::mediumvioletred.withHue(0.5f));
         pulsaretVisualizer.setAmp(audioProcessor.getFlashCoef());
@@ -163,9 +176,8 @@ void PulsarAudioProcessorEditor::repaintPulsaret()
     else
     {
         pulsaretVisualizer.setNewWaveColour(juce::Colours::black);
-        pulsaretVisualizer.repaint(); 
+        pulsaretVisualizer.repaint();
     }
-
 }
 
 void PulsarAudioProcessorEditor::timerCallback()
@@ -173,115 +185,3 @@ void PulsarAudioProcessorEditor::timerCallback()
     repaint();
     repaintPulsaret();
 }
-
-
-// PopupMenu PulsarAudioProcessorEditor::getMenuForIndex(int menuIndex, const String& /*menuName*/)
-// {
-//     PopupMenu menu;
-//     menu.setLookAndFeel(&pulsarFeel);
-//     if (menuIndex == 0)
-//     {
-//         menu.addCommandItem(&commandManager, CommandIDs::freshStart);
-//         menu.addCommandItem(&commandManager, CommandIDs::loadPreset);
-//         menu.addCommandItem(&commandManager, CommandIDs::loadUserPreset);
-//     }
-//     if (menuIndex == 1)
-//     {
-//         menu.addCommandItem(&commandManager, CommandIDs::explainPulsarSynthesis);
-//         menu.addCommandItem(&commandManager, CommandIDs::parametersExplained);
-//     }
-//     return menu;
-// }
-
-// ApplicationCommandTarget* PulsarAudioProcessorEditor::getNextCommandTarget()
-// {
-//     return nullptr;
-// }
-
-// void PulsarAudioProcessorEditor::getAllCommands(Array<CommandID>& c)
-// {
-//     Array<CommandID> commands
-//     {
-//         CommandIDs::freshStart,
-//         CommandIDs::loadPreset,
-//         CommandIDs::loadUserPreset,
-//         CommandIDs::explainPulsarSynthesis,
-//         CommandIDs::parametersExplained,
-//     };
-//     c.addArray(commands);
-// }
-
-// void PulsarAudioProcessorEditor::getCommandInfo(CommandID commandID, ApplicationCommandInfo& result)
-// {
-//     switch (commandID)
-//     {
-//     case CommandIDs::freshStart:
-//         result.setInfo("Start Fresh", "Mode designed for basic Pulsar operation.", "Menu", 0);
-//         result.setTicked(false);
-//         break;
-//     case CommandIDs::loadPreset:
-//         result.setInfo("Signature Presets", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-//         result.setTicked(false);
-//         break;
-//     case CommandIDs::loadUserPreset:
-//         result.setInfo("User Preset", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-//         result.setTicked(false);
-//         break;
-//     case CommandIDs::explainPulsarSynthesis:
-//         result.setInfo("Pulsar Synthesis Overview", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-//         result.setTicked(false);
-//         break;
-//     case CommandIDs::parametersExplained:
-//         result.setInfo("Parameter Dictionary", "A unique software tutorial reminiscent of video games of yore.", "Menu", 0);
-//         result.setTicked(false);
-//         break;
-//     default:
-//         break;
-//     }
-// }
-
-// bool PulsarAudioProcessorEditor::perform(const InvocationInfo& info)
-// {
-//     switch (info.commandID)
-//     {
-//     case CommandIDs::freshStart:
-//         commandRunner->setVisible(false);
-//         audioProcessor.loadPreset(String("C:/ProgramData/Recluse-Audio/Pulsar/Presets/Default"));
-//         break;
-//     case CommandIDs::loadPreset:
-//         commandRunner->setVisible(true);
-//         sidePanel.showOrHide(false);
-//         commandRunner->startPresetMenu();
-//         break;
-//     case CommandIDs::loadUserPreset:
-//         commandRunner->setVisible(true);
-//         sidePanel.showOrHide(false);
-//         commandRunner->startUserPresetMenu();
-//         break;
-//     case CommandIDs::explainPulsarSynthesis:
-//         commandRunner->setVisible(true);
-//         sidePanel.showOrHide(false);
-//         commandRunner->startTutorial();
-//         break;
-//     case CommandIDs::parametersExplained:
-//         commandRunner->setVisible(true);
-//         sidePanel.showOrHide(false);
-//         commandRunner->startParameterDemo();
-//         break;
-//     default:
-//         return false;
-//     }
-//     return true;
-// }
-
-// void PulsarAudioProcessorEditor::setBurgerMenuPosition()
-// {
-//     burgerMenu.setModel(this);
-//     menuHeader.setVisible(true);
-//     burgerMenu.setSize(sidePanel.getWidth(), sidePanel.getHeight());
-//     sidePanel.setContent(&burgerMenu, false);
-//     sidePanel.setColour(juce::SidePanel::backgroundColour, juce::Colours::black);
-//     menuItemsChanged();
-//     resized();
-// }
-

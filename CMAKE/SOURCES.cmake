@@ -1,24 +1,17 @@
 set(SOURCES
-    SOURCE/Components/AboutComponent.h
-    SOURCE/Components/BurgerMenuHeader.h
-    SOURCE/Components/CommandRunnerComponent.h
-    SOURCE/Components/DemoComponent.h
+    SOURCE/Components/CreatePresetView.h
     SOURCE/Components/EnvelopeControlPoint.h
     SOURCE/Components/EnvelopeVisualizer.cpp
     SOURCE/Components/EnvelopeVisualizer.h
-    SOURCE/Components/ParameterDictionary.h
     SOURCE/Components/PluginEditor.cpp
     SOURCE/Components/PluginEditor.h
-    SOURCE/Components/PresetMenu.h
+    SOURCE/Components/PresetManagerView.h
     SOURCE/Components/PulsarControlsComponent.cpp
     SOURCE/Components/PulsarControlsComponent.h
     SOURCE/Components/PulsarSlider.cpp
     SOURCE/Components/PulsarSlider.h
     SOURCE/Components/PulsaretVisualizer.cpp
     SOURCE/Components/PulsaretVisualizer.h
-    SOURCE/Components/ThanksComponent.h
-    SOURCE/Components/TutorialImageComponent.h
-    SOURCE/Components/UserPresetMenu.h
     SOURCE/Database.h
     SOURCE/Envelope/Envelope.cpp
     SOURCE/Envelope/Envelope.h
@@ -48,5 +41,6 @@ set(SOURCES
     SOURCE/Pulsaret/PulsaretTable.h
     SOURCE/Pulsaret/Table.cpp
     SOURCE/Pulsaret/Table.h
+    SOURCE/Util/PresetPaths.h
     SOURCE/Util/Version.h
 )

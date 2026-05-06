@@ -10,59 +10,31 @@
 
 #include <JuceHeader.h>
 #include "PulsaretVisualizer.h"
+#include "PresetManagerView.h"
+#include "CreatePresetView.h"
 #include "../Processor/PluginProcessor.h"
 #include "../LookNFeel/NameFeel.h"
 #include "../LookNFeel/MixFeel.h"
 #include "../LookNFeel/PulsarUIFeel.h"
-// #include "BurgerMenuHeader.h"
-// #include "CommandRunnerComponent.h"
 #include "PulsarControlsComponent.h"
 #include "PulsarSlider.h"
 
 //==============================================================================
-/**
-*/
-class PulsarAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer /*, public juce::ApplicationCommandTarget,
- public juce::MenuBarModel*/
+class PulsarAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer
 {
 public:
     PulsarAudioProcessorEditor (PulsarAudioProcessor&);
     ~PulsarAudioProcessorEditor() override;
     void init();
     void resetSliders();
-    //==============================================================================
+
     void paint (juce::Graphics&) override;
     void resized() override;
 
     void repaintPulsaret();
-    
     void timerCallback() override;
-   
+
     void setTestColor(juce::Colour c){ color = c; }
-
-    /* Menu Bar Model Virtuals*/
-    // StringArray getMenuBarNames() override { return {}; }
-    // PopupMenu getMenuForIndex(int menuIndex, const String& /*menuName*/) override;
-    // void menuItemSelected(int /*menuItemID*/, int /*topLevelMenuIndex*/) override {}
-
-    /*Application Command Target Virtuals*/
-    // ApplicationCommandTarget* getNextCommandTarget() override;
-    // void getAllCommands(Array<CommandID>& commands) override;
-    // void getCommandInfo(CommandID commandID, ApplicationCommandInfo& result) override;
-    // bool perform(const InvocationInfo& info) override;
-    // void setBurgerMenuPosition();
-
-    // enum CommandIDs
-    // {
-    //     freshStart = 1,
-    //     loadPreset,
-    //     loadUserPreset,
-    //     explainPulsarSynthesis,
-    //     parametersExplained,
-    //     testBasicOperation,
-    //     loadAboutPage,
-    //     loadFoundersAppreciation
-    // };
 
 private:
     PulsarUIFeel pulsarFeel;
@@ -77,27 +49,19 @@ private:
 
     std::unique_ptr<PulsarControlsComponent> controlComponent;
 
-    // ApplicationCommandManager commandManager;
-    // std::unique_ptr<TextButton> closeButton;
-    // std::unique_ptr <CommandRunnerComponent>   commandRunner;
+    std::unique_ptr<juce::TextButton>   presetButton;
+    std::unique_ptr<juce::TextButton>   savePresetButton;
+    std::unique_ptr<PresetManagerView>  presetManagerView;
+    std::unique_ptr<CreatePresetView>   createPresetView;
 
-    // std::unique_ptr<MenuBarComponent> menuBar;
-
-    // SidePanel sidePanel{ "", 300, false };
-
-    // BurgerMenuComponent burgerMenu;
-
-    // BurgerMenuHeader menuHeader{ sidePanel };
-
-
-    PulsaretVisualizer  pulsaretVisualizer;
+    PulsaretVisualizer pulsaretVisualizer;
 
     juce::Rectangle<int> frame;
-    Component frameComponent;
-    
+    juce::Component frameComponent;
+
     NameFeel nameFeel;
-    std::unique_ptr<Label>          nameLabel;
-    std::unique_ptr<Label>          versionLabel;
+    std::unique_ptr<juce::Label> nameLabel;
+    std::unique_ptr<juce::Label> versionLabel;
 
     PulsarAudioProcessor& audioProcessor;
 
