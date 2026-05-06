@@ -132,6 +132,22 @@ jobs:
           if (-not (Test-Path $exe))  { throw "Standalone not found: $exe" }
           Write-Host "OK: VST3 + Standalone present."
 
+      - name: Diagnose Azure auth
+        shell: pwsh
+        run: |
+          # Confirm SP creds work and role is reachable.
+          az login --service-principal `
+            -u $env:AZURE_CLIENT_ID `
+            -p $env:AZURE_CLIENT_SECRET `
+            -t $env:AZURE_TENANT_ID
+          if ($LASTEXITCODE -ne 0) { throw "az login failed — bad SP creds." }
+
+          Write-Host "Account context:"
+          az account show
+          Write-Host ""
+          Write-Host "Role assignments for this SP:"
+          az role assignment list --assignee $env:AZURE_CLIENT_ID --all -o table
+
       - name: Smoke-test sign (Pulsar.exe)
         shell: pwsh
         run: |
