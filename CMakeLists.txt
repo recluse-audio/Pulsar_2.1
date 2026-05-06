@@ -134,11 +134,12 @@ if(BUILD_TESTS OR TARGET Tests)
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/SOURCE
         ${CMAKE_BINARY_DIR}/Pulsar_artefacts/JuceLibraryCode
+        ${CMAKE_CURRENT_SOURCE_DIR}/SUBMODULES/RD/SOURCE
         ${CMAKE_CURRENT_SOURCE_DIR}/SUBMODULES/RD/TESTS/TEST_UTILS
     )
 
     target_link_libraries(Tests PRIVATE
-        Catch2::Catch2WithMain
+        Catch2::Catch2
         juce::juce_audio_utils
         juce::juce_audio_processors
     )
