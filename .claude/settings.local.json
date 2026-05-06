@@ -28,7 +28,8 @@
       "Bash(plutil -extract CFBundleShortVersionString raw BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.app/Contents/Info.plist)",
       "Bash(python3 SIGNED/release_workflow_mac.py)",
       "Bash(echo \"exit: $?\")",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "WebSearch"
     ]
   }
 }
