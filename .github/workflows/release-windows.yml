@@ -1,9 +1,9 @@
 name: Release Windows (sign + package)
 
-# Phase 2: skeleton + signing toolchain provisioned. Builds Release VST3 +
-# Standalone on a windows-latest runner, installs Inno Setup and the Azure
-# Trusted Signing Client Tools, and verifies signtool + the dlib are
-# reachable. No signing yet — that lands in Phase 3+.
+# Phase 3: signing toolchain provisioned + Azure auth wired in. Writes
+# metadata.json from secrets, exports AZURE_* for DefaultAzureCredential,
+# then smoke-signs the just-built Pulsar.exe and verifies with signtool /pa.
+# Full release_workflow_pc.py wiring lands in Phase 4.
 # See .claude/github-pc-signing-plan.md for the full phased plan.
 
 on:
@@ -12,6 +12,10 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    env:
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
     steps:
       - name: Checkout repository
@@ -60,6 +64,30 @@ jobs:
           Copy-Item -Path (Join-Path $binDir "*") -Destination $dest -Recurse -Force
           Write-Host "Copied dlib payload from $binDir to $dest"
 
+      - name: Configure Azure Code Signing (write metadata.json)
+        shell: pwsh
+        env:
+          ACS_ENDPOINT: ${{ secrets.ACS_ENDPOINT }}
+          ACS_ACCOUNT_NAME: ${{ secrets.ACS_ACCOUNT_NAME }}
+          ACS_PROFILE_NAME: ${{ secrets.ACS_PROFILE_NAME }}
+        run: |
+          if (-not $env:ACS_ENDPOINT)     { throw "ACS_ENDPOINT secret missing." }
+          if (-not $env:ACS_ACCOUNT_NAME) { throw "ACS_ACCOUNT_NAME secret missing." }
+          if (-not $env:ACS_PROFILE_NAME) { throw "ACS_PROFILE_NAME secret missing." }
+          if (-not $env:AZURE_TENANT_ID)     { throw "AZURE_TENANT_ID secret missing." }
+          if (-not $env:AZURE_CLIENT_ID)     { throw "AZURE_CLIENT_ID secret missing." }
+          if (-not $env:AZURE_CLIENT_SECRET) { throw "AZURE_CLIENT_SECRET secret missing." }
+
+          $azureDir = Join-Path $HOME ".azure"
+          New-Item -ItemType Directory -Force -Path $azureDir | Out-Null
+          $metadata = [ordered]@{
+            Endpoint               = $env:ACS_ENDPOINT
+            CodeSigningAccountName = $env:ACS_ACCOUNT_NAME
+            CertificateProfileName = $env:ACS_PROFILE_NAME
+          } | ConvertTo-Json
+          Set-Content -Path (Join-Path $azureDir "metadata.json") -Value $metadata -Encoding utf8
+          Write-Host "OK: metadata.json written to $azureDir"
+
       - name: Verify signing toolchain
         shell: pwsh
         run: |
@@ -103,6 +131,28 @@ jobs:
           if (-not (Test-Path $vst3)) { throw "VST3 not found: $vst3" }
           if (-not (Test-Path $exe))  { throw "Standalone not found: $exe" }
           Write-Host "OK: VST3 + Standalone present."
+
+      - name: Smoke-test sign (Pulsar.exe)
+        shell: pwsh
+        run: |
+          $exe = "BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.exe"
+          $smokeCopy = Join-Path $env:RUNNER_TEMP "Pulsar.smoke.exe"
+          Copy-Item $exe $smokeCopy -Force
+
+          $dlib = Join-Path $env:LOCALAPPDATA "Microsoft\MicrosoftArtifactSigningClientTools\Azure.CodeSigning.Dlib.dll"
+          $metadata = Join-Path $HOME ".azure\metadata.json"
+
+          signtool.exe sign /v /debug `
+            /fd SHA256 `
+            /tr "http://timestamp.acs.microsoft.com" /td SHA256 `
+            /dlib $dlib /dmdf $metadata `
+            $smokeCopy
+          if ($LASTEXITCODE -ne 0) { throw "signtool sign failed (exit $LASTEXITCODE)." }
+
+          signtool.exe verify /pa /v $smokeCopy
+          if ($LASTEXITCODE -ne 0) { throw "signtool verify failed (exit $LASTEXITCODE)." }
+
+          Write-Host "OK: smoke-test sign + verify passed."
 
       - name: Upload unsigned VST3
         uses: actions/upload-artifact@v4
