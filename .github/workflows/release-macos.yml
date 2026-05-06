@@ -1,8 +1,8 @@
 name: Release macOS (sign + notarize)
 
-# Phase 2: skeleton + temp keychain provisioning. Imports both Developer ID
-# certs into an ephemeral keychain and verifies via `security find-identity`.
-# Still does NOT sign or notarize — that arrives in Phases 3–4.
+# Phase 3: keychain provisioning + notary profile registration. Sets up the
+# `notary-profile` that SIGNED/MAC/notarize_mac.py expects to exist.
+# Still does NOT actually sign or notarize — Phase 4 wires that in.
 # See .claude/github-mac-signing-plan.md for the full phased plan.
 
 on:
@@ -79,6 +79,27 @@ jobs:
           security find-identity -v | grep -q "Developer ID Application:"
           security find-identity -v | grep -q "Developer ID Installer:"
           echo "OK: both identities found."
+
+      - name: Register notary profile
+        env:
+          APPLE_ID:           ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID:      ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_NOTARYTOOL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          : "${APPLE_ID:?APPLE_ID secret is not set}"
+          : "${APPLE_TEAM_ID:?APPLE_TEAM_ID secret is not set}"
+          : "${APPLE_NOTARYTOOL_PASSWORD:?APPLE_NOTARYTOOL_PASSWORD secret is not set}"
+
+          # Profile name 'notary-profile' matches DEFAULT_NOTARY_PROFILE in
+          # SIGNED/MAC/mac_identity.py — keep them in sync if either changes.
+          xcrun notarytool store-credentials notary-profile \
+            --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_NOTARYTOOL_PASSWORD" \
+            --keychain "$HOME/Library/Keychains/build.keychain-db"
+
+          echo "OK: notary profile 'notary-profile' registered."
 
       - name: Read version
         id: version

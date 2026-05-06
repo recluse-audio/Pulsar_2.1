@@ -101,7 +101,7 @@ not run the workflow until all seven exist.**
 | `MAC_KEYCHAIN_PASSWORD` | Throwaway password for the temp keychain we create on the runner | Generate any random string |
 | `APPLE_ID` | Apple ID email | Yours |
 | `APPLE_TEAM_ID` | 10-char Developer team ID | Apple Developer portal → Membership |
-| `APPLE_APP_PASSWORD` | App-specific password for notarization | appleid.apple.com → Sign-In and Security → App-Specific Passwords |
+| `APPLE_NOTARYTOOL_PASSWORD` | App-specific password for notarization | appleid.apple.com → Sign-In and Security → App-Specific Passwords |
 
 ---
 
@@ -159,13 +159,13 @@ zip contains a universal `.vst3`, `.component`, `.app`. (We can verify with
 **Goal:** notarytool can submit without prompts.
 
 **Steps:**
-1. Add `APPLE_ID`, `APPLE_TEAM_ID`, `APPLE_APP_PASSWORD` secrets.
+1. Add `APPLE_ID`, `APPLE_TEAM_ID`, `APPLE_NOTARYTOOL_PASSWORD` secrets.
 2. New step "Register notary profile" after the keychain is set up:
    ```
    xcrun notarytool store-credentials notary-profile \
      --apple-id "$APPLE_ID" \
      --team-id "$APPLE_TEAM_ID" \
-     --password "$APPLE_APP_PASSWORD" \
+     --password "$APPLE_NOTARYTOOL_PASSWORD" \
      --keychain "$HOME/Library/Keychains/build.keychain-db"
    ```
    The profile name `notary-profile` matches `DEFAULT_NOTARY_PROFILE` in
