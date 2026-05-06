@@ -171,6 +171,21 @@ runner before we attempt to use them.
 
 ### Phase 3 — Wire Azure auth + write metadata.json
 
+**Status: IN PROGRESS — blocked on Azure RBAC/profile visibility.**
+
+Current symptom in CI (`release-windows.yml` smoke step):
+- `az resource list --resource-type Microsoft.CodeSigning/.../certificateProfiles -o json` returns `[]` for the SP.
+- `signtool sign` fails: "After EKU filter, 0 certs were left. After expiry filter, 0 certs were left." → dlib received zero certs from the service.
+
+Root cause hypothesis (verifying one step at a time with user in Azure portal):
+1. SP missing `Artifact Signing Certificate Profile Signer` role on the cert profile resource (most likely).
+2. Identity Validation on `RecluseToolsAccount` not in `Completed` state — profile cannot issue certs even with role.
+3. `ACS_ENDPOINT` region mismatch vs account location.
+
+Note: Microsoft rebranded again — portal shows **"Artifact Signing Account"** (was Trusted Signing / Azure Code Signing). Same resource provider `Microsoft.CodeSigning/codeSigningAccounts`. Role name to assign: `Artifact Signing Certificate Profile Signer`.
+
+NuGet install path confirmed working (commit `c71aa14` switched winget → nuget for hosted runner compat). Dlib lands at `%LOCALAPPDATA%\Microsoft\MicrosoftArtifactSigningClientTools\`.
+
 **Goal:** signtool can sign a throwaway test exe end-to-end.
 
 **Steps:**

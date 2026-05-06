@@ -55,9 +55,12 @@ jobs:
           nuget install Microsoft.ArtifactSigning.Client -OutputDirectory $work -ExcludeVersion -NonInteractive
           if ($LASTEXITCODE -ne 0) { throw "nuget install failed (exit $LASTEXITCODE)." }
 
+          # Must pick x64 dlib — signtool runs as x64. x86 dlib loads silently fail
+          # and yield "0 certs after EKU filter".
           $dll = Get-ChildItem -Path $work -Recurse -Filter "Azure.CodeSigning.Dlib.dll" -ErrorAction SilentlyContinue |
+                 Where-Object { $_.FullName -match '\\bin\\x64\\' } |
                  Sort-Object FullName -Descending | Select-Object -First 1
-          if (-not $dll) { throw "Azure.CodeSigning.Dlib.dll not found in NuGet package." }
+          if (-not $dll) { throw "Azure.CodeSigning.Dlib.dll (x64) not found in NuGet package." }
 
           # Copy entire bin folder (dll has native + managed deps next to it).
           $binDir = $dll.Directory.FullName
