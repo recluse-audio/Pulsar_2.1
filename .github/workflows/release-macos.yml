@@ -1,0 +1,58 @@
+name: Release macOS (sign + notarize)
+
+# Phase 1: skeleton only — builds a universal Release, uploads unsigned
+# bundles as artifacts. No signing, no notarization yet.
+# See .claude/github-mac-signing-plan.md for the full phased plan.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: macos-14  # Apple Silicon; supports universal builds via Xcode
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install CMake
+        run: brew install cmake
+
+      - name: Read version
+        id: version
+        run: echo "version=$(cat VERSION.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Configure (universal)
+        run: |
+          cmake -S . -B BUILD \
+            -G Xcode \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+
+      - name: Build All (Release, universal)
+        run: cmake --build BUILD --target Pulsar_All --config Release
+
+      - name: Verify universal slices
+        run: |
+          set -e
+          ART="BUILD/Pulsar_artefacts/Release"
+          lipo -info "$ART/VST3/Pulsar.vst3/Contents/MacOS/Pulsar"
+          lipo -info "$ART/AU/Pulsar.component/Contents/MacOS/Pulsar"
+          lipo -info "$ART/Standalone/Pulsar.app/Contents/MacOS/Pulsar"
+
+      - name: Package unsigned bundles
+        run: |
+          ART="BUILD/Pulsar_artefacts/Release"
+          ditto -c -k --sequesterRsrc --keepParent "$ART/VST3/Pulsar.vst3"        Pulsar-macOS-VST3-unsigned.zip
+          ditto -c -k --sequesterRsrc --keepParent "$ART/AU/Pulsar.component"     Pulsar-macOS-AU-unsigned.zip
+          ditto -c -k --sequesterRsrc --keepParent "$ART/Standalone/Pulsar.app"   Pulsar-macOS-Standalone-unsigned.zip
+
+      - name: Upload unsigned bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pulsar-macOS-${{ steps.version.outputs.version }}-unsigned
+          path: |
+            Pulsar-macOS-VST3-unsigned.zip
+            Pulsar-macOS-AU-unsigned.zip
+            Pulsar-macOS-Standalone-unsigned.zip
