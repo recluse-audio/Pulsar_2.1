@@ -1,9 +1,10 @@
 name: Release Windows (sign + package)
 
-# Phase 3: signing toolchain provisioned + Azure auth wired in. Writes
-# metadata.json from secrets, exports AZURE_* for DefaultAzureCredential,
-# then smoke-signs the just-built Pulsar.exe and verifies with signtool /pa.
-# Full release_workflow_pc.py wiring lands in Phase 4.
+# Phase 4: full release. Provisions Inno Setup + Azure signing toolchain,
+# writes metadata.json from secrets, exports AZURE_* for DefaultAzureCredential,
+# builds Release VST3 + Standalone, then runs release_workflow_pc.py to sign
+# builds, build + sign the installer, and stage RELEASE/PC/<version>/. The
+# signed release dir is uploaded as the artifact.
 # See .claude/github-pc-signing-plan.md for the full phased plan.
 
 on:
@@ -151,47 +152,25 @@ jobs:
           Write-Host "Role assignments for this SP:"
           az role assignment list --assignee $env:AZURE_CLIENT_ID --all -o table
 
-      - name: Smoke-test sign (Pulsar.exe)
+      - name: Run release workflow (sign builds + build/sign installer)
         shell: pwsh
         run: |
-          $meta = Get-Content (Join-Path $HOME ".azure\metadata.json") | ConvertFrom-Json
-          Write-Host "metadata.json field lengths (values masked):"
-          Write-Host "  Endpoint:               $($meta.Endpoint.Length) chars, ends with '/' = $($meta.Endpoint.EndsWith('/'))"
-          Write-Host "  CodeSigningAccountName: $($meta.CodeSigningAccountName.Length) chars"
-          Write-Host "  CertificateProfileName: $($meta.CertificateProfileName.Length) chars"
-          Write-Host ""
+          python SIGNED/release_workflow_pc.py
+          if ($LASTEXITCODE -ne 0) { throw "release_workflow_pc.py failed (exit $LASTEXITCODE)." }
 
-          Write-Host "Cert profiles in account (raw JSON — names get masked if they match secrets):"
-          az resource list --resource-type "Microsoft.CodeSigning/codeSigningAccounts/certificateProfiles" -o json
-          Write-Host ""
+      - name: Verify installer signature
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION.txt).Trim()
+          $installer = Get-ChildItem "RELEASE/PC/$version/Pulsar_v*_Windows_Installer.exe" -ErrorAction SilentlyContinue |
+                       Select-Object -First 1
+          if (-not $installer) { throw "Signed installer not found in RELEASE/PC/$version/." }
+          signtool.exe verify /pa /v $installer.FullName
+          if ($LASTEXITCODE -ne 0) { throw "Installer signature verify failed (exit $LASTEXITCODE)." }
+          Write-Host "OK: signed installer verified at $($installer.FullName)"
 
-          $exe = "BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.exe"
-          $smokeCopy = Join-Path $env:RUNNER_TEMP "Pulsar.smoke.exe"
-          Copy-Item $exe $smokeCopy -Force
-
-          $dlib = Join-Path $env:LOCALAPPDATA "Microsoft\MicrosoftArtifactSigningClientTools\Azure.CodeSigning.Dlib.dll"
-          $metadata = Join-Path $HOME ".azure\metadata.json"
-
-          signtool.exe sign /v /debug `
-            /fd SHA256 `
-            /tr "http://timestamp.acs.microsoft.com" /td SHA256 `
-            /dlib $dlib /dmdf $metadata `
-            $smokeCopy
-          if ($LASTEXITCODE -ne 0) { throw "signtool sign failed (exit $LASTEXITCODE)." }
-
-          signtool.exe verify /pa /v $smokeCopy
-          if ($LASTEXITCODE -ne 0) { throw "signtool verify failed (exit $LASTEXITCODE)." }
-
-          Write-Host "OK: smoke-test sign + verify passed."
-
-      - name: Upload unsigned VST3
+      - name: Upload signed release
         uses: actions/upload-artifact@v4
         with:
-          name: Pulsar-Windows-VST3-${{ steps.version.outputs.version }}-unsigned
-          path: BUILD/Pulsar_artefacts/Release/VST3/Pulsar.vst3
-
-      - name: Upload unsigned Standalone
-        uses: actions/upload-artifact@v4
-        with:
-          name: Pulsar-Windows-Standalone-${{ steps.version.outputs.version }}-unsigned
-          path: BUILD/Pulsar_artefacts/Release/Standalone/Pulsar.exe
+          name: Pulsar-Windows-${{ steps.version.outputs.version }}-signed
+          path: RELEASE/PC/${{ steps.version.outputs.version }}/
